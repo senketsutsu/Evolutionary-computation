@@ -1,0 +1,9 @@
+slajdy od 40 w EC.pdf opisują podejścia
+
+wybrany język: 
+
+nearest is not always the eukledian distance (its distance + cost)
+
+visualizations in py but code in cpp????
+
+report befor the next labs; grade after the lab 
