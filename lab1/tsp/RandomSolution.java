@@ -25,22 +25,30 @@ public class RandomSolution {
      *
      * @param solution The list of node indices representing the Hamiltonian cycle.
      * @param distanceMatrix The 2D array representing distances between nodes.
+     * @param nodeData The 2D array containing node coordinates and costs.
      * @return The total cost of the Hamiltonian cycle.
      */
-    public static double calculateCost(List<Integer> solution, double[][] distanceMatrix) {
+    public static double calculateCost(List<Integer> solution, double[][] distanceMatrix, double[][] nodeData) {
         if (solution == null || distanceMatrix == null || distanceMatrix.length == 0) {
             throw new IllegalArgumentException("Solution or distance matrix cannot be null or empty.");
         }
-        if (solution.size() != distanceMatrix.length) {
+        if (solution.size() * 2 < distanceMatrix.length) {
             throw new IllegalArgumentException("Solution size must match the number of nodes in the distance matrix.");
         }
 
         double cost = 0;
         for (int i = 0; i < solution.size() - 1; i++) {
-            cost += distanceMatrix[solution.get(i)][solution.get(i + 1)];
+            int currentNode = solution.get(i);
+            int nextNode = solution.get(i + 1);
+            cost += distanceMatrix[currentNode][nextNode];
+            cost += nodeData[currentNode][2];
         }
-        // Add cost to return to the starting node to complete the cycle
-        cost += distanceMatrix[solution.get(solution.size() - 1)][solution.get(0)];
+
+        int lastNode = solution.get(solution.size() - 1);
+        int startNode = solution.get(0);
+        cost += distanceMatrix[lastNode][startNode];
+        cost += nodeData[lastNode][2];
+
         return cost;
     }
 }
