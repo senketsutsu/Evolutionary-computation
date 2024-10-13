@@ -17,7 +17,7 @@ import java.io.FileWriter;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        double[][] nodes = CSVReader.readCSV("data/TSPA.csv");
+        double[][] nodes = CSVReader.readCSV("data/TSPB.csv");
         double[][] distanceMatrix = DistanceMatrix.calculateDistanceMatrix(nodes);
         int numNodes = nodes.length;
 
