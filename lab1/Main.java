@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -32,8 +33,8 @@ public class Main {
 
         // Generate 200 random solutions
         for (int i = 0; i < trials; i++) {
-            List<Integer> randomSolution = RandomSolution.generateRandomSolution(nodesToSelect, numNodes);
-            double cost = RandomSolution.calculateCost(randomSolution, distanceMatrix, nodes);
+            List<Integer> randomSolution = RandomSolution.generateRandomSolution(numNodes);
+            double cost = RandomSolution.calculateCost(randomSolution, distanceMatrix);
             minRandom = Math.min(minRandom, cost);
             maxRandom = Math.max(maxRandom, cost);
             avgRandom += cost;
@@ -43,8 +44,8 @@ public class Main {
         // Generate 200 nearest neighbor solutions (end)
         for (int i = 0; i < trials; i++) {
             int startNode = (int) (Math.random() * numNodes);
-            List<Integer> nnEndSolution = NearestNeighborEnd.nearestNeighborEnd(distanceMatrix, startNode, nodesToSelect);
-            double cost = RandomSolution.calculateCost(nnEndSolution, distanceMatrix, nodes);
+            List<Integer> nnEndSolution = NearestNeighborEnd.nearestNeighborEnd(distanceMatrix, startNode);
+            double cost = RandomSolution.calculateCost(nnEndSolution, distanceMatrix);
             minNNEnd = Math.min(minNNEnd, cost);
             maxNNEnd = Math.max(maxNNEnd, cost);
             avgNNEnd += cost;
@@ -54,8 +55,8 @@ public class Main {
         // Generate 200 nearest neighbor solutions (any position)
         for (int i = 0; i < trials; i++) {
             int startNode = (int) (Math.random() * numNodes);
-            List<Integer> nnAnySolution = NearestNeighborAnyPosition.nearestNeighborAnyPosition(distanceMatrix, startNode, nodesToSelect);
-            double cost = RandomSolution.calculateCost(nnAnySolution, distanceMatrix, nodes);
+            List<Integer> nnAnySolution = NearestNeighborAnyPosition.nearestNeighborAnyPosition(distanceMatrix, startNode);
+            double cost = RandomSolution.calculateCost(nnAnySolution, distanceMatrix);
             minNNAny = Math.min(minNNAny, cost);
             maxNNAny = Math.max(maxNNAny, cost);
             avgNNAny += cost;
@@ -65,8 +66,8 @@ public class Main {
         // Generate 200 greedy cycle solutions
         for (int i = 0; i < trials; i++) {
             int startNode = (int) (Math.random() * numNodes);
-            List<Integer> greedySolution = GreedyCycle.greedyCycle(distanceMatrix, startNode, nodesToSelect);
-            double cost = RandomSolution.calculateCost(greedySolution, distanceMatrix, nodes);
+            List<Integer> greedySolution = GreedyCycle.greedyCycle(distanceMatrix, startNode);
+            double cost = RandomSolution.calculateCost(greedySolution, distanceMatrix);
             minGreedy = Math.min(minGreedy, cost);
             maxGreedy = Math.max(maxGreedy, cost);
             avgGreedy += cost;

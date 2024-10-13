@@ -15,8 +15,9 @@ public class RandomSolution {
         for (int i = 0; i < n; i++) {
             nodes.add(i);
         }
+        int nodesToSelect = (int) Math.ceil(n / 2.0);
         Collections.shuffle(nodes, new Random()); // Shuffle nodes to generate a random order
-        return nodes;
+        return nodes.subList(0, n);
     }
 
     /**
