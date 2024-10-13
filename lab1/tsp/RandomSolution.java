@@ -17,7 +17,7 @@ public class RandomSolution {
         }
         int nodesToSelect = (int) Math.ceil(n / 2.0);
         Collections.shuffle(nodes, new Random()); // Shuffle nodes to generate a random order
-        return nodes.subList(0, n);
+        return nodes.subList(0, nodesToSelect);
     }
 
     /**

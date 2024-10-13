@@ -32,6 +32,9 @@ public class Main {
         // 50% of total nodes, rounded up
         int nodesToSelect = (int) Math.ceil(numNodes / 2.0);
 
+        File bestPaths = new File("output/best_paths.csv");
+        List<Integer> bestPath = new ArrayList<>();
+
         // random solutions
         for (int i = 0; i < trials; i++) {
             List<Integer> randomSolution = RandomSolution.generateRandomSolution(numNodes);
@@ -39,8 +42,24 @@ public class Main {
             minRandom = Math.min(minRandom, cost);
             maxRandom = Math.max(maxRandom, cost);
             avgRandom += cost;
+            if( minRandom == cost ){
+                bestPath = randomSolution;
+            }
         }
+
+        try (FileWriter writer = new FileWriter(bestPaths, true)) {
+            writer.write("Random");
+            for (int j = 0; j < bestPath.size(); j++) {
+                writer.write("," + bestPath.get(j));
+            }
+            writer.write("\n");
+        }
+
         avgRandom /= trials;
+
+        List<Integer> bestPathNN = new ArrayList<>();
+        List<Integer> bestPathNNany = new ArrayList<>();
+        List<Integer> bestPathGreedy = new ArrayList<>();
 
         // nearest neighbor solutions (end)
         for (int i = 0; i < trials; i++) {
@@ -52,6 +71,11 @@ public class Main {
                 minNNEnd = Math.min(minNNEnd, cost);
                 maxNNEnd = Math.max(maxNNEnd, cost);
                 avgNNEnd += cost;
+
+                if( minNNEnd == cost ){
+                    bestPathNN = nnEndSolution;
+                }
+
                 // }
                 // avgNNEnd /= trials;
 
@@ -63,6 +87,11 @@ public class Main {
                 minNNAny = Math.min(minNNAny, cost);
                 maxNNAny = Math.max(maxNNAny, cost);
                 avgNNAny += cost;
+
+                if( minNNAny == cost ){
+                    bestPathNNany = nnAnySolution;
+                }
+
                 // }
                 // avgNNAny /= trials;
 
@@ -74,11 +103,35 @@ public class Main {
                 minGreedy = Math.min(minGreedy, cost);
                 maxGreedy = Math.max(maxGreedy, cost);
                 avgGreedy += cost;
+
+                if( minGreedy == cost ){
+                    bestPathGreedy = greedySolution;
+                }
             }
         }
         avgGreedy /= (trials * numNodes);
         avgNNEnd /= (trials * numNodes);
         avgNNAny /= (trials * numNodes);
+
+        try (FileWriter writer = new FileWriter(bestPaths, true)) {
+            writer.write("NN End");
+            for (int j = 0; j < bestPathNN.size(); j++) {
+                writer.write("," + bestPathNN.get(j));
+            }
+            writer.write("\n");
+
+            writer.write("NN Any");
+            for (int j = 0; j < bestPathNNany.size(); j++) {
+                writer.write("," + bestPathNNany.get(j));
+            }
+            writer.write("\n");
+
+            writer.write("Greedy");
+            for (int j = 0; j < bestPathGreedy.size(); j++) {
+                writer.write("," + bestPathGreedy.get(j));
+            }
+            writer.write("\n");
+        }
 
         System.out.println("Random Solution - Min: " + minRandom + ", Max: " + maxRandom + ", Avg: " + avgRandom);
         System.out.println("Nearest Neighbor (End) - Min: " + minNNEnd + ", Max: " + maxNNEnd + ", Avg: " + avgNNEnd);
