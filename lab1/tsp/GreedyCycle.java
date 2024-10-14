@@ -77,7 +77,7 @@ public class GreedyCycle {
         cost += distanceMatrix[newNode][nextNode];
         cost += nodes[newNode][2];
 
-        if (position > 0 || path.size() > 1) {
+        if (position > 0 || path.size() > 1) {   // change to also include the last (if last than only one edge)
             cost -= distanceMatrix[previousNode][nextNode];
         }
 
