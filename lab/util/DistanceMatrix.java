@@ -1,4 +1,4 @@
-package lab2.util;
+package lab.util;
 
 public class DistanceMatrix {
     /**

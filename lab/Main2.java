@@ -1,13 +1,13 @@
-package lab2;
+package lab;
 
-import lab2.tsp.RandomSolution;
-import lab2.tsp.NearestNeighborEnd;
-import lab2.tsp.NearestNeighborAnyPosition;
-import lab2.tsp.GreedyCycle;
-import lab2.tsp.Greedy2Regret;
-import lab2.tsp.GreedyWeighted;
-import lab2.util.CSVReader;
-import lab2.util.DistanceMatrix;
+import lab.tsp.RandomSolution;
+import lab.tsp.NearestNeighborEnd;
+import lab.tsp.NearestNeighborAnyPosition;
+import lab.tsp.GreedyCycle;
+import lab.tsp.Greedy2Regret;
+import lab.tsp.GreedyWeighted;
+import lab.util.CSVReader;
+import lab.util.DistanceMatrix;
 
 import java.io.IOException;
 import java.util.ArrayList;
