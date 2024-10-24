@@ -1,0 +1,4 @@
+LAB 1
+- the pseudocode should be simpler and shorter (do not include for example initial value for minimum = inf.)
+- nothing was said about the visual aspect of the report but most people used latex
+- there was a logical issue in one of the cost-calculating functions (to be fixed - new issue)
