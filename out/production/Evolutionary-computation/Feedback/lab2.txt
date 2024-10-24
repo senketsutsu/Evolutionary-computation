@@ -1,0 +1,4 @@
+Feedback:
+- no need to include the pseudocode from previouse labs in the new lab (even if the results are compared) - ONLY INCLUDE IF SOMETHING WAS CHANGED!!!
+- still find why the nn any is not so good (for b should be better than the weighted regret)
+- bigger plots (do something to show the difference between the results to better show that some are better than other)
