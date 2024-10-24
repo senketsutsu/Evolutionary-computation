@@ -1,19 +1,10 @@
-package lab1.tsp;
+package lab.tsp;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NearestNeighborAnyPosition {
-
-    /**
-     * Finds path using a nearest neighbor approach, allowing insertion at any position in the path (s.47).
-     *
-     * @param distanceMatrix The 2D array representing the distances between nodes.
-     * @param startNode     The index of the starting node for the path.
-     * @param nodes The 2D array containing node coordinates and costs.
-     * @return A list of node indices representing the Hamiltonian path.
-     */
-    public static List<Integer> nearestNeighborAnyPosition(double[][] distanceMatrix, int startNode, double[][] nodes) {
+public class Greedy2Regret {
+    public static List<Integer> greedy2Regret(double[][] distanceMatrix, int startNode, double[][] nodes) {
         if (distanceMatrix == null || distanceMatrix.length == 0) {
             throw new IllegalArgumentException("Distance matrix cannot be null or empty.");
         }
@@ -25,27 +16,46 @@ public class NearestNeighborAnyPosition {
         visited[startNode] = true;
         int nodesToSelect = (int) Math.ceil(n / 2.0);
 
-        for (int i = 0; i < nodesToSelect - 1; i++) {
+        // all vertices have been added (50%)
+        while (path.size() < nodesToSelect) {
             int bestNode = -1;
             double bestIncrementalCost = Double.MAX_VALUE;
             int bestPosition = -1;
+            double bestRegret = -1;
 
-            // add to the solution the vertex (and the leading edge) closest to any
             for (int candidateNode = 0; candidateNode < n; candidateNode++) {
+                double bestIncrementalCost1 = Double.MAX_VALUE;
+                int bestPosition1 = -1;
+                double bestIncrementalCost2 = Double.MAX_VALUE;
+                int bestPosition2 = -1;
+                double regret = -1;
                 if (!visited[candidateNode]) {
                     for (int position = 0; position <= path.size(); position++) {
                         double incrementalCost = calculateIncrementalCost(path, distanceMatrix, candidateNode, position, nodes);
-                        if (incrementalCost < bestIncrementalCost) {
-                            bestIncrementalCost = incrementalCost;
-                            bestNode = candidateNode;
-                            bestPosition = position;
+                        if (incrementalCost < bestIncrementalCost1) {
+                            bestIncrementalCost2 = bestIncrementalCost1;
+                            bestPosition2 = bestPosition1;
+                            bestIncrementalCost1 = incrementalCost;
+                            bestPosition1 = position;
+                        } else if (incrementalCost < bestIncrementalCost2) {
+                            bestIncrementalCost2 = incrementalCost;
+                            bestPosition2 = position;
                         }
+                    }
+                    regret = bestIncrementalCost2 - bestIncrementalCost1;
+                    if (regret > bestRegret){
+                        bestRegret = regret;
+                        bestIncrementalCost = bestIncrementalCost1;
+                        bestNode = candidateNode;
+                        bestPosition = bestPosition1;
                     }
                 }
             }
 
-            path.add(bestPosition, bestNode);
-            visited[bestNode] = true;
+            if (bestNode >= 0 && bestPosition >= 0) {
+                path.add(bestPosition, bestNode); // Insert node at the best position
+                visited[bestNode] = true;
+            }
         }
 
         return path;
@@ -70,7 +80,7 @@ public class NearestNeighborAnyPosition {
         cost += distanceMatrix[newNode][nextNode];
         cost += nodes[newNode][2];
 
-        if (position > 0) {
+        if (position > 0 || path.size() > 1) {   // change to also include the last (if last than only one edge)
             cost -= distanceMatrix[previousNode][nextNode];
         }
 

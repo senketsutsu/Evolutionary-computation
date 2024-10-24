@@ -1,21 +1,10 @@
-package lab1.tsp;
+package lab.tsp;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collections;
-import java.util.Comparator;
 
-public class GreedyCycle {
-
-    /**
-     * Generates cycle using a greedy algorithm based on the distance matrix (s.57).
-     *
-     * @param distanceMatrix 2D array representing the distances between nodes.
-     * @param startNode     The index of the starting node for the cycle.
-     * @param nodes The 2D array containing node coordinates and costs.
-     * @return A list of node indices representing the Hamiltonian cycle.
-     */
-    public static List<Integer> greedyCycle(double[][] distanceMatrix, int startNode, double[][] nodes) {
+public class GreedyWeighted {
+    public static List<Integer> greedyWeighted(double[][] distanceMatrix, int startNode, double[][] nodes) {
         if (distanceMatrix == null || distanceMatrix.length == 0) {
             throw new IllegalArgumentException("Distance matrix cannot be null or empty.");
         }
@@ -32,19 +21,33 @@ public class GreedyCycle {
             int bestNode = -1;
             double bestIncrementalCost = Double.MAX_VALUE;
             int bestPosition = -1;
+            double bestWeightedSum = Double.MAX_VALUE;
 
-            // insert into the current cycle in the best possible place the vertex
-            // causing the smallest increase in cycle length
-
-            for (int position = 0; position <= path.size(); position++) {
-                for (int candidateNode = 0; candidateNode < n; candidateNode++) {
-                    if (!visited[candidateNode]) {
+            for (int candidateNode = 0; candidateNode < n; candidateNode++) {
+                double bestIncrementalCost1 = Double.MAX_VALUE;
+                int bestPosition1 = -1;
+                double bestIncrementalCost2 = Double.MAX_VALUE;
+                int bestPosition2 = -1;
+                double weightedSum = Double.MAX_VALUE;
+                if (!visited[candidateNode]) {
+                    for (int position = 0; position <= path.size(); position++) {
                         double incrementalCost = calculateIncrementalCost(path, distanceMatrix, candidateNode, position, nodes);
-                        if (incrementalCost < bestIncrementalCost) {
-                            bestIncrementalCost = incrementalCost;
-                            bestNode = candidateNode;
-                            bestPosition = position;
-                            }
+                        if (incrementalCost < bestIncrementalCost1) {
+                            bestIncrementalCost2 = bestIncrementalCost1;
+                            bestPosition2 = bestPosition1;
+                            bestIncrementalCost1 = incrementalCost;
+                            bestPosition1 = position;
+                        } else if (incrementalCost < bestIncrementalCost2) {
+                            bestIncrementalCost2 = incrementalCost;
+                            bestPosition2 = position;
+                        }
+                    }
+                    weightedSum = (-(bestIncrementalCost2 - bestIncrementalCost1) + bestIncrementalCost1) / 2;
+                    if (weightedSum < bestWeightedSum){
+                        bestWeightedSum = weightedSum;
+                        bestIncrementalCost = bestIncrementalCost1;
+                        bestNode = candidateNode;
+                        bestPosition = bestPosition1;
                     }
                 }
             }
