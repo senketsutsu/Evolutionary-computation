@@ -1,5 +1,7 @@
 package lab.tsp;
 
+import lab.tsp.RandomSolution;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,19 +63,35 @@ public class NearestNeighborAnyPosition {
      * @param nodes The 2D array containing node coordinates and costs.
      * @return The cost increase if the new node is added at the specified position.
      */
-    private static double calculateIncrementalCost(List<Integer> path, double[][] distanceMatrix, int newNode, int position, double[][] nodes) {
-        double cost = 0.0;
-        int previousNode = position > 0 ? path.get(position - 1) : path.get(path.size() - 1);
-        int nextNode = position < path.size() ? path.get(position) : path.get(0);
+    public static double calculateIncrementalCost(List<Integer> path, double[][] distanceMatrix, int newNode, int position, double[][] nodes) {
+        int pathSize = path.size();
 
-        cost += distanceMatrix[previousNode][newNode];
-        cost += distanceMatrix[newNode][nextNode];
-        cost += nodes[newNode][2];
+        // If the node is inserted at the end of the path, including the edge back to the start node
+        if (position == pathSize) {
+            int lastNode = path.get(pathSize - 1);
+            int firstNode = path.get(0);
+            double costNewNode = nodes[newNode][2];
 
-        if (position > 0) {
-            cost -= distanceMatrix[previousNode][nextNode];
+            // (lastNode -> newNode -> firstNode) minus (lastNode -> firstNode)
+            return (distanceMatrix[lastNode][newNode] + costNewNode + distanceMatrix[newNode][firstNode] - distanceMatrix[lastNode][firstNode]);
         }
 
-        return cost;
+        // If the node is inserted at the beginning of the path
+        if (position == 0) {
+            int lastNode = path.get(pathSize - 1);
+            int firstNode = path.get(0);
+            double costNewNode = nodes[newNode][2];
+
+            // (lastNode -> newNode -> firstNode) minus (lastNode -> firstNode)
+            return (distanceMatrix[lastNode][newNode] + costNewNode + distanceMatrix[newNode][firstNode] - distanceMatrix[lastNode][firstNode]);
+        }
+
+        // If the node is inserted in between two existing nodes in the path
+        int prevNode = path.get(position - 1);
+        int nextNode = path.get(position);
+        double costNewNode = nodes[newNode][2];
+
+        return (distanceMatrix[prevNode][newNode] + costNewNode + distanceMatrix[newNode][nextNode] - distanceMatrix[prevNode][nextNode]);
     }
 }
+

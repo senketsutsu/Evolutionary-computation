@@ -51,4 +51,33 @@ public class RandomSolution {
 
         return cost;
     }
+
+    /**
+     * Calculates the total cost of a given cycle based on the distance matrix.
+     *
+     * @param solution The list of node indices representing the Hamiltonian cycle.
+     * @param distanceMatrix The 2D array representing distances between nodes.
+     * @param nodeData The 2D array containing node coordinates and costs.
+     * @return The total cost of the Hamiltonian cycle.
+     */
+    public static double calculateAnyCost(List<Integer> solution, double[][] distanceMatrix, double[][] nodeData) {
+        if (solution == null || distanceMatrix == null || distanceMatrix.length == 0) {
+            throw new IllegalArgumentException("Solution or distance matrix cannot be null or empty.");
+        }
+
+        double cost = 0;
+        for (int i = 0; i < solution.size() - 1; i++) {
+            int currentNode = solution.get(i);
+            int nextNode = solution.get(i + 1);
+            cost += distanceMatrix[currentNode][nextNode];
+            cost += nodeData[currentNode][2];
+        }
+
+        int lastNode = solution.get(solution.size() - 1);
+        int startNode = solution.get(0);
+        cost += distanceMatrix[lastNode][startNode];
+        cost += nodeData[lastNode][2];
+
+        return cost;
+    }
 }

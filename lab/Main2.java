@@ -68,82 +68,82 @@ public class Main2 {
         List<Integer> bestPathGreedyWeighted = new ArrayList<>();
 
         // nearest neighbor solutions (end)
-        for (int i = 0; i < 1; i++) {
-            for (int j = 0; j < numNodes; j++) {
 
-                int startNode = (int) (j);
-                List<Integer> nnEndSolution = NearestNeighborEnd.nearestNeighborEnd(distanceMatrix, startNode, nodes);
-                double cost = RandomSolution.calculateCost(nnEndSolution, distanceMatrix, nodes);
-                minNNEnd = Math.min(minNNEnd, cost);
-                maxNNEnd = Math.max(maxNNEnd, cost);
-                avgNNEnd += cost;
+        for (int j = 0; j < numNodes; j++) {
 
-                if( minNNEnd == cost ){
-                    bestPathNN = nnEndSolution;
-                }
+            int startNode = (int) (j);
+            List<Integer> nnEndSolution = NearestNeighborEnd.nearestNeighborEnd(distanceMatrix, startNode, nodes);
+            double cost = RandomSolution.calculateCost(nnEndSolution, distanceMatrix, nodes);
+            minNNEnd = Math.min(minNNEnd, cost);
+            maxNNEnd = Math.max(maxNNEnd, cost);
+            avgNNEnd += cost;
 
-                // }
-                // avgNNEnd /= trials;
+            if( minNNEnd == cost ){
+                bestPathNN = nnEndSolution;
+            }
 
-                // nearest neighbor solutions (any position)
-                // for (int i = 0; i < trials; i++) {
-                // int startNode = (int) (Math.random() * numNodes);
-                List<Integer> nnAnySolution = NearestNeighborAnyPosition.nearestNeighborAnyPosition(distanceMatrix, startNode, nodes);
-                cost = RandomSolution.calculateCost(nnAnySolution, distanceMatrix, nodes);
-                minNNAny = Math.min(minNNAny, cost);
-                maxNNAny = Math.max(maxNNAny, cost);
-                avgNNAny += cost;
+            // }
+            // avgNNEnd /= trials;
 
-                if( minNNAny == cost ){
-                    bestPathNNany = nnAnySolution;
-                }
+            // nearest neighbor solutions (any position)
+            // for (int i = 0; i < trials; i++) {
+            // int startNode = (int) (Math.random() * numNodes);
+            List<Integer> nnAnySolution = NearestNeighborAnyPosition.nearestNeighborAnyPosition(distanceMatrix, startNode, nodes);
+            cost = RandomSolution.calculateCost(nnAnySolution, distanceMatrix, nodes);
+            minNNAny = Math.min(minNNAny, cost);
+            maxNNAny = Math.max(maxNNAny, cost);
+            avgNNAny += cost;
 
-                // }
-                // avgNNAny /= trials;
+            if( minNNAny == cost ){
+                bestPathNNany = nnAnySolution;
+            }
 
-                // greedy cycle
-                // for (int i = 0; i < trials; i++) {
-                // int startNode = (int) (Math.random() * numNodes);
-                List<Integer> greedySolution = GreedyCycle.greedyCycle(distanceMatrix, startNode, nodes);
-                cost = RandomSolution.calculateCost(greedySolution, distanceMatrix, nodes);
-                minGreedy = Math.min(minGreedy, cost);
-                maxGreedy = Math.max(maxGreedy, cost);
-                avgGreedy += cost;
+            // }
+            // avgNNAny /= trials;
 
-                if( minGreedy == cost ){
-                    bestPathGreedy = greedySolution;
-                }
+            // greedy cycle
+            // for (int i = 0; i < trials; i++) {
+            // int startNode = (int) (Math.random() * numNodes);
+            List<Integer> greedySolution = GreedyCycle.greedyCycle(distanceMatrix, startNode, nodes);
+            cost = RandomSolution.calculateCost(greedySolution, distanceMatrix, nodes);
+            minGreedy = Math.min(minGreedy, cost);
+            maxGreedy = Math.max(maxGreedy, cost);
+            avgGreedy += cost;
 
-                // greedy 2 regret
+            if( minGreedy == cost ){
+                bestPathGreedy = greedySolution;
+            }
 
-                List<Integer> greedy2RegretSolution = Greedy2Regret.greedy2Regret(distanceMatrix, startNode, nodes);
-                cost = RandomSolution.calculateCost(greedy2RegretSolution, distanceMatrix, nodes);
-                minGreedy2Regret = Math.min(minGreedy2Regret, cost);
-                maxGreedy2Regret = Math.max(maxGreedy2Regret, cost);
-                avgGreedy2Regret += cost;
+            // greedy 2 regret
 
-                if( minGreedy2Regret == cost ){
-                    bestPathGreedy2Regret = greedy2RegretSolution;
-                }
+            List<Integer> greedy2RegretSolution = Greedy2Regret.greedy2Regret(distanceMatrix, startNode, nodes);
+            cost = RandomSolution.calculateCost(greedy2RegretSolution, distanceMatrix, nodes);
+            minGreedy2Regret = Math.min(minGreedy2Regret, cost);
+            maxGreedy2Regret = Math.max(maxGreedy2Regret, cost);
+            avgGreedy2Regret += cost;
 
-                // greedy 2 regret weighted
+            if( minGreedy2Regret == cost ){
+                bestPathGreedy2Regret = greedy2RegretSolution;
+            }
 
-                List<Integer> greedyWeightedSolution = GreedyWeighted.greedyWeighted(distanceMatrix, startNode, nodes);
-                cost = RandomSolution.calculateCost(greedyWeightedSolution, distanceMatrix, nodes);
-                minGreedyWeighted = Math.min(minGreedyWeighted, cost);
-                maxGreedyWeighted = Math.max(maxGreedyWeighted, cost);
-                avgGreedyWeighted += cost;
+            // greedy 2 regret weighted
 
-                if( minGreedyWeighted == cost ){
-                    bestPathGreedyWeighted = greedyWeightedSolution;
-                }
+            List<Integer> greedyWeightedSolution = GreedyWeighted.greedyWeighted(distanceMatrix, startNode, nodes);
+            cost = RandomSolution.calculateCost(greedyWeightedSolution, distanceMatrix, nodes);
+            minGreedyWeighted = Math.min(minGreedyWeighted, cost);
+            maxGreedyWeighted = Math.max(maxGreedyWeighted, cost);
+            avgGreedyWeighted += cost;
+
+            if( minGreedyWeighted == cost ){
+                bestPathGreedyWeighted = greedyWeightedSolution;
             }
         }
-        avgGreedy /= (1 * numNodes);
-        avgNNEnd /= (1 * numNodes);
-        avgNNAny /= (1 * numNodes);
-        avgGreedy2Regret /= (1 * numNodes);
-        avgGreedyWeighted /= (1 * numNodes);
+
+        avgGreedy /= (numNodes);
+        avgNNEnd /= (numNodes);
+        avgNNAny /= (numNodes);
+        avgGreedy2Regret /= (numNodes);
+        avgGreedyWeighted /= (numNodes);
 
         try (FileWriter writer = new FileWriter(bestPaths, true)) {
             writer.write("NN End");
