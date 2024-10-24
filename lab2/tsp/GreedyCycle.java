@@ -1,9 +1,7 @@
-package lab2.tsp;
+package lab.tsp;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collections;
-import java.util.Comparator;
 
 public class GreedyCycle {
 

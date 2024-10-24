@@ -1,4 +1,4 @@
-package lab2.tsp;
+package lab.tsp;
 
 import java.util.ArrayList;
 import java.util.List;
