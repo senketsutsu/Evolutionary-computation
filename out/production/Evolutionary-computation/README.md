@@ -5,12 +5,15 @@ This Java project implements various algorithms to solve the Traveling Salesman 
 ## Project Structure
 ```
 lab1
-├── Main.java                
+├── Main1.java
+├── Main2.java          
 ├── tsp                      
 │   ├── RandomSolution.java       
 │   ├── NearestNeighborEnd.java 
 │   ├── NearestNeighborAnyPosition.java
-│   └── GreedyCycle.java       
+│   ├── GreedyCycle.java
+|   ├── Greedy2Regret.java
+│   └── GreedyWeighted.java
 └── util               
 │   ├── CSVReader.java      
 │   └── DistanceMatrix.java      

@@ -90,7 +90,7 @@ public class Main3 {
             List<Integer> initialSolution = GreedyWeighted.greedyWeighted(distanceMatrix, startNode, nodes);
 
             // Steepest Local Search
-            List<Integer> steepestSolution = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "inter");
+            List<Integer> steepestSolution = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-egde");
             double costSteepest = RandomSolution.calculateCost(steepestSolution, distanceMatrix, nodes);
             minSteepestLocal_inter = Math.min(minSteepestLocal_inter, costSteepest);
             maxSteepestLocal_inter = Math.max(maxSteepestLocal_inter, costSteepest);
@@ -101,7 +101,7 @@ public class Main3 {
 
             System.out.print("+");
             // Greedy Local Search
-            List<Integer> greedyLocalSolution = greedyLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "inter");
+            List<Integer> greedyLocalSolution = greedyLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-egde");
             double costGreedyLocal = RandomSolution.calculateCost(greedyLocalSolution, distanceMatrix, nodes);
             minGreedyLocal_inter = Math.min(minGreedyLocal_inter, costGreedyLocal);
             maxGreedyLocal_inter = Math.max(maxGreedyLocal_inter, costGreedyLocal);
@@ -112,7 +112,7 @@ public class Main3 {
 
             System.out.print("+");
             // Steepest Local Search
-            List<Integer> steepestSolution2 = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "intra");
+            List<Integer> steepestSolution2 = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-nodes");
             double costSteepest2 = RandomSolution.calculateCost(steepestSolution2, distanceMatrix, nodes);
             minSteepestLocal_intra = Math.min(minSteepestLocal_intra, costSteepest2);
             maxSteepestLocal_intra = Math.max(maxSteepestLocal_intra, costSteepest2);
@@ -123,7 +123,7 @@ public class Main3 {
 
             System.out.println("+");
             // Greedy Local Search
-            List<Integer> greedyLocalSolution2 = greedyLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "intra");
+            List<Integer> greedyLocalSolution2 = greedyLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-nodes");
             double costGreedyLocal2 = RandomSolution.calculateCost(greedyLocalSolution2, distanceMatrix, nodes);
             minGreedyLocal_intra = Math.min(minGreedyLocal_intra, costGreedyLocal2);
             maxGreedyLocal_intra = Math.max(maxGreedyLocal_intra, costGreedyLocal2);
@@ -146,7 +146,7 @@ public class Main3 {
             List<Integer> initialSolution = RandomSolution.generateRandomSolution(nodes.length);
 
             // Steepest Local Search
-            List<Integer> steepestSolution1 = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "inter");
+            List<Integer> steepestSolution1 = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-egde");
             double costSteepest = RandomSolution.calculateCost(steepestSolution1, distanceMatrix, nodes);
             minSteepestLocal_inter_rand  = Math.min(minSteepestLocal_inter_rand , costSteepest);
             maxSteepestLocal_inter_rand  = Math.max(maxSteepestLocal_inter_rand , costSteepest);
@@ -157,7 +157,7 @@ public class Main3 {
 
             System.out.print("+");
             // Greedy Local Search
-            List<Integer> greedyLocalSolution1 = greedyLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "inter");
+            List<Integer> greedyLocalSolution1 = greedyLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-egde");
             double costGreedyLocal = RandomSolution.calculateCost(greedyLocalSolution1, distanceMatrix, nodes);
             minGreedyLocal_inter_rand  = Math.min(minGreedyLocal_inter_rand , costGreedyLocal);
             maxGreedyLocal_inter_rand  = Math.max(maxGreedyLocal_inter_rand , costGreedyLocal);
@@ -168,7 +168,7 @@ public class Main3 {
 
             System.out.print("+");
             // Steepest Local Search
-            List<Integer> steepestSolution21 = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "intra");
+            List<Integer> steepestSolution21 = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-nodes");
             double costSteepest21 = RandomSolution.calculateCost(steepestSolution21, distanceMatrix, nodes);
             minSteepestLocal_intra_rand = Math.min(minSteepestLocal_intra_rand, costSteepest21);
             maxSteepestLocal_intra_rand = Math.max(maxSteepestLocal_intra_rand, costSteepest21);
@@ -179,7 +179,7 @@ public class Main3 {
 
             System.out.println("+");
             // Greedy Local Search
-            List<Integer> greedyLocalSolution21 = greedyLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "intra");
+            List<Integer> greedyLocalSolution21 = greedyLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-nodes");
             double costGreedyLocal2 = RandomSolution.calculateCost(greedyLocalSolution21, distanceMatrix, nodes);
             minGreedyLocal_intra_rand  = Math.min(minGreedyLocal_intra_rand , costGreedyLocal2);
             maxGreedyLocal_intra_rand  = Math.max(maxGreedyLocal_intra_rand , costGreedyLocal2);
@@ -197,48 +197,48 @@ public class Main3 {
         // add local search tests here
 
         try (FileWriter writer = new FileWriter(bestPaths, true)) {
-            writer.write("SteepestLocalSearch_intra");
+            writer.write("SteepestLocalSearch_nodes");
             for (int node : bestPathSteepest_intra) writer.write("," + node);
             writer.write("\n");
 
-            writer.write("GreedyLocalSearch_intra");
+            writer.write("GreedyLocalSearch_nodes");
             for (int node : bestPathGreedyLocal_intra) writer.write("," + node);
             writer.write("\n");
 
-            writer.write("SteepestLocalSearch_inter");
+            writer.write("SteepestLocalSearch_egde");
             for (int node : bestPathSteepest_inter) writer.write("," + node);
             writer.write("\n");
 
-            writer.write("GreedyLocalSearch_inter");
+            writer.write("GreedyLocalSearch_egde");
             for (int node : bestPathGreedyLocal_inter) writer.write("," + node);
             writer.write("\n");
 
-            writer.write("SteepestLocalSearch_intra_rand");
+            writer.write("SteepestLocalSearch_nodes_rand");
             for (int node : bestPathSteepest_intra_rand) writer.write("," + node);
             writer.write("\n");
 
-            writer.write("GreedyLocalSearch_intra_rand");
+            writer.write("GreedyLocalSearch_nodes_rand");
             for (int node : bestPathGreedyLocal_intra_rand) writer.write("," + node);
             writer.write("\n");
 
-            writer.write("SteepestLocalSearch_inter_rand");
+            writer.write("SteepestLocalSearch_egde_rand");
             for (int node : bestPathSteepest_inter_rand) writer.write("," + node);
             writer.write("\n");
 
-            writer.write("GreedyLocalSearch_inter_rand");
+            writer.write("GreedyLocalSearch_egde_rand");
             for (int node : bestPathGreedyLocal_inter_rand) writer.write("," + node);
             writer.write("\n");
         }
 
 
-        System.out.println("Steepest Local_inter Search - Min: " + minSteepestLocal_inter + ", Max: " + maxSteepestLocal_inter + ", Avg: " + avgSteepestLocal_inter);
-        System.out.println("Greedy Local_inter Search - Min: " + minGreedyLocal_inter + ", Max: " + maxGreedyLocal_inter + ", Avg: " + avgGreedyLocal_inter);
-        System.out.println("Steepest Local_inter_rand Search - Min: " + minSteepestLocal_inter_rand + ", Max: " + maxSteepestLocal_inter_rand + ", Avg: " + avgSteepestLocal_inter_rand);
-        System.out.println("Greedy Local_inter_rand Search - Min: " + minGreedyLocal_inter_rand + ", Max: " + maxGreedyLocal_inter_rand + ", Avg: " + avgGreedyLocal_inter_rand);
-        System.out.println("Steepest Local_intra Search - Min: " + minSteepestLocal_intra + ", Max: " + maxSteepestLocal_intra + ", Avg: " + avgSteepestLocal_intra);
-        System.out.println("Greedy Local_intra Search - Min: " + minGreedyLocal_intra + ", Max: " + maxGreedyLocal_intra + ", Avg: " + avgGreedyLocal_intra);
-        System.out.println("Steepest Local_intra_rand Search - Min: " + minSteepestLocal_intra_rand + ", Max: " + maxSteepestLocal_intra_rand + ", Avg: " + avgSteepestLocal_intra_rand);
-        System.out.println("Greedy Local_intra_rand Search - Min: " + minGreedyLocal_intra_rand + ", Max: " + maxGreedyLocal_intra_rand + ", Avg: " + avgGreedyLocal_intra_rand);
+        System.out.println("Steepest Local_egde Search - Min: " + minSteepestLocal_inter + ", Max: " + maxSteepestLocal_inter + ", Avg: " + avgSteepestLocal_inter);
+        System.out.println("Greedy Local_egde Search - Min: " + minGreedyLocal_inter + ", Max: " + maxGreedyLocal_inter + ", Avg: " + avgGreedyLocal_inter);
+        System.out.println("Steepest Local_egde_rand Search - Min: " + minSteepestLocal_inter_rand + ", Max: " + maxSteepestLocal_inter_rand + ", Avg: " + avgSteepestLocal_inter_rand);
+        System.out.println("Greedy Local_egde_rand Search - Min: " + minGreedyLocal_inter_rand + ", Max: " + maxGreedyLocal_inter_rand + ", Avg: " + avgGreedyLocal_inter_rand);
+        System.out.println("Steepest Local_nodes Search - Min: " + minSteepestLocal_intra + ", Max: " + maxSteepestLocal_intra + ", Avg: " + avgSteepestLocal_intra);
+        System.out.println("Greedy Local_nodes Search - Min: " + minGreedyLocal_intra + ", Max: " + maxGreedyLocal_intra + ", Avg: " + avgGreedyLocal_intra);
+        System.out.println("Steepest Local_nodes_rand Search - Min: " + minSteepestLocal_intra_rand + ", Max: " + maxSteepestLocal_intra_rand + ", Avg: " + avgSteepestLocal_intra_rand);
+        System.out.println("Greedy Local_nodes_rand Search - Min: " + minGreedyLocal_intra_rand + ", Max: " + maxGreedyLocal_intra_rand + ", Avg: " + avgGreedyLocal_intra_rand);
 
 
         appendResultsToCSV(minSteepestLocal_inter, maxSteepestLocal_inter, avgSteepestLocal_inter,
