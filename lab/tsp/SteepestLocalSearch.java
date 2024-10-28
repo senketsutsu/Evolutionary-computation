@@ -13,13 +13,15 @@ public class SteepestLocalSearch {
         double bestCost = RandomSolution.calculateCost(currentSolution, distanceMatrix, nodes);
         boolean improvement = true;
         int iterationCount = 0;
-        int maxIterations = 10000;
+        int maxIterations = 1000;
 
         while (improvement && iterationCount < maxIterations) {
             improvement = false;
             double bestDelta = 0;
             int bestI = -1, bestJ = -1;
             boolean isInterRouteMove = false;
+
+            // TODO: Add random binary if that selects which move is done
 
             if (moveType.equals("intra") || moveType.equals("both")) {
                 for (int i = 0; i < currentSolution.size(); i++) {

@@ -11,7 +11,7 @@ public class GreedyLocalSearch {
         double currentCost = RandomSolution.calculateCost(currentSolution, distanceMatrix, nodes);
         boolean improvement = true;
         int iterationCount = 0;
-        int maxIterations = 20000;
+        int maxIterations = 1000;
 
         while (improvement && iterationCount < maxIterations) {
             improvement = false;
@@ -23,6 +23,8 @@ public class GreedyLocalSearch {
             // Shuffle the moves to ensure randomness
             Collections.shuffle(intraMoves);
             Collections.shuffle(interMoves);
+
+            // TODO: Add random binary if that selects which move is done
 
             // Check for intra-route improvements first
             for (int[] move : intraMoves) {

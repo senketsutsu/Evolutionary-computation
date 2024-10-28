@@ -13,9 +13,9 @@ import lab.tsp.GreedyLocalSearch;
 import lab.util.CSVReader;
 import lab.util.DistanceMatrix;
 
-public class Main3 {
+public class Main4 {
     public static void main(String[] args) throws IOException {
-        double[][] nodes = CSVReader.readCSV("data/TSPB.csv");
+        double[][] nodes = CSVReader.readCSV("data/TSPA.csv");
         double[][] distanceMatrix = DistanceMatrix.calculateDistanceMatrix(nodes);
         int numNodes = nodes.length;
 
@@ -39,31 +39,10 @@ public class Main3 {
         // 50% of total nodes, rounded up
         int nodesToSelect = (int) Math.ceil(numNodes / 2.0);
 
-        File bestPaths = new File("output/best_paths_local_search.csv");
+        File bestPaths = new File("output/best_paths_local_search_times.csv");
         List<Integer> bestPath = new ArrayList<>();
         System.out.println("step1");
 
-        // random solutions
-        for (int i = 0; i < trials; i++) {
-            List<Integer> randomSolution = RandomSolution.generateRandomSolution(numNodes);
-            double cost = RandomSolution.calculateCost(randomSolution, distanceMatrix, nodes);
-            minRandom = Math.min(minRandom, cost);
-            maxRandom = Math.max(maxRandom, cost);
-            avgRandom += cost;
-            if( minRandom == cost ){
-                bestPath = randomSolution;
-            }
-        }
-
-        System.out.println("step2: random");
-
-        try (FileWriter writer = new FileWriter(bestPaths, true)) {
-            writer.write("Random");
-            for (int j = 0; j < bestPath.size(); j++) {
-                writer.write("," + bestPath.get(j));
-            }
-            writer.write("\n");
-        }
 
         avgRandom /= trials;
 
@@ -90,8 +69,11 @@ public class Main3 {
             List<Integer> initialSolution = GreedyWeighted.greedyWeighted(distanceMatrix, startNode, nodes);
 
             // Steepest Local Search
+            long startTime = System.nanoTime();
             List<Integer> steepestSolution = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-edges");
-            double costSteepest = RandomSolution.calculateCost(steepestSolution, distanceMatrix, nodes);
+            long endTime = System.nanoTime();
+            double elapsedTime = (endTime - startTime) / 1e6;
+            double costSteepest = elapsedTime;
             minSteepestLocal_inter = Math.min(minSteepestLocal_inter, costSteepest);
             maxSteepestLocal_inter = Math.max(maxSteepestLocal_inter, costSteepest);
             avgSteepestLocal_inter += costSteepest;
@@ -101,8 +83,11 @@ public class Main3 {
 
             System.out.print("+");
             // Greedy Local Search
+            startTime = System.nanoTime();
             List<Integer> greedyLocalSolution = greedyLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-edges");
-            double costGreedyLocal = RandomSolution.calculateCost(greedyLocalSolution, distanceMatrix, nodes);
+            endTime = System.nanoTime();
+            elapsedTime = (endTime - startTime) / 1e6;
+            double costGreedyLocal = elapsedTime;
             minGreedyLocal_inter = Math.min(minGreedyLocal_inter, costGreedyLocal);
             maxGreedyLocal_inter = Math.max(maxGreedyLocal_inter, costGreedyLocal);
             avgGreedyLocal_inter += costGreedyLocal;
@@ -112,8 +97,11 @@ public class Main3 {
 
             System.out.print("+");
             // Steepest Local Search
+            startTime = System.nanoTime();
             List<Integer> steepestSolution2 = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-nodes");
-            double costSteepest2 = RandomSolution.calculateCost(steepestSolution2, distanceMatrix, nodes);
+            endTime = System.nanoTime();
+            elapsedTime = (endTime - startTime) / 1e6;
+            double costSteepest2 = elapsedTime;
             minSteepestLocal_intra = Math.min(minSteepestLocal_intra, costSteepest2);
             maxSteepestLocal_intra = Math.max(maxSteepestLocal_intra, costSteepest2);
             avgSteepestLocal_intra += costSteepest2;
@@ -123,8 +111,11 @@ public class Main3 {
 
             System.out.println("+");
             // Greedy Local Search
+            startTime = System.nanoTime();
             List<Integer> greedyLocalSolution2 = greedyLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-nodes");
-            double costGreedyLocal2 = RandomSolution.calculateCost(greedyLocalSolution2, distanceMatrix, nodes);
+            endTime = System.nanoTime();
+            elapsedTime = (endTime - startTime) / 1e6;
+            double costGreedyLocal2 = elapsedTime;
             minGreedyLocal_intra = Math.min(minGreedyLocal_intra, costGreedyLocal2);
             maxGreedyLocal_intra = Math.max(maxGreedyLocal_intra, costGreedyLocal2);
             avgGreedyLocal_intra += costGreedyLocal2;
@@ -146,8 +137,11 @@ public class Main3 {
             List<Integer> initialSolution = RandomSolution.generateRandomSolution(nodes.length);
 
             // Steepest Local Search
+            long startTime = System.nanoTime();
             List<Integer> steepestSolution1 = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-edges");
-            double costSteepest = RandomSolution.calculateCost(steepestSolution1, distanceMatrix, nodes);
+            long endTime = System.nanoTime();
+            double elapsedTime = (endTime - startTime) / 1e6;
+            double costSteepest = elapsedTime;
             minSteepestLocal_inter_rand  = Math.min(minSteepestLocal_inter_rand , costSteepest);
             maxSteepestLocal_inter_rand  = Math.max(maxSteepestLocal_inter_rand , costSteepest);
             avgSteepestLocal_inter_rand  += costSteepest;
@@ -157,8 +151,11 @@ public class Main3 {
 
             System.out.print("+");
             // Greedy Local Search
+            startTime = System.nanoTime();
             List<Integer> greedyLocalSolution1 = greedyLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-edges");
-            double costGreedyLocal = RandomSolution.calculateCost(greedyLocalSolution1, distanceMatrix, nodes);
+            endTime = System.nanoTime();
+            elapsedTime = (endTime - startTime) / 1e6;
+            double costGreedyLocal = elapsedTime;
             minGreedyLocal_inter_rand  = Math.min(minGreedyLocal_inter_rand , costGreedyLocal);
             maxGreedyLocal_inter_rand  = Math.max(maxGreedyLocal_inter_rand , costGreedyLocal);
             avgGreedyLocal_inter_rand  += costGreedyLocal;
@@ -168,8 +165,11 @@ public class Main3 {
 
             System.out.print("+");
             // Steepest Local Search
+            startTime = System.nanoTime();
             List<Integer> steepestSolution21 = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-nodes");
-            double costSteepest21 = RandomSolution.calculateCost(steepestSolution21, distanceMatrix, nodes);
+            endTime = System.nanoTime();
+            elapsedTime = (endTime - startTime) / 1e6;
+            double costSteepest21 = elapsedTime;
             minSteepestLocal_intra_rand = Math.min(minSteepestLocal_intra_rand, costSteepest21);
             maxSteepestLocal_intra_rand = Math.max(maxSteepestLocal_intra_rand, costSteepest21);
             avgSteepestLocal_intra_rand += costSteepest21;
@@ -179,8 +179,11 @@ public class Main3 {
 
             System.out.println("+");
             // Greedy Local Search
+            startTime = System.nanoTime();
             List<Integer> greedyLocalSolution21 = greedyLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-nodes");
-            double costGreedyLocal2 = RandomSolution.calculateCost(greedyLocalSolution21, distanceMatrix, nodes);
+            endTime = System.nanoTime();
+            elapsedTime = (endTime - startTime) / 1e6;
+            double costGreedyLocal2 = elapsedTime;
             minGreedyLocal_intra_rand  = Math.min(minGreedyLocal_intra_rand , costGreedyLocal2);
             maxGreedyLocal_intra_rand  = Math.max(maxGreedyLocal_intra_rand , costGreedyLocal2);
             avgGreedyLocal_intra_rand  += costGreedyLocal2;
@@ -263,7 +266,7 @@ public class Main3 {
             double minSteepestLocal_intra_rand, double maxSteepestLocal_intra_rand, double avgSteepestLocal_intra_rand,
             double minGreedyLocal_intra_rand, double maxGreedyLocal_intra_rand, double avgGreedyLocal_intra_rand
     ) throws IOException {
-        File file = new File("output/results.csv");
+        File file = new File("output/results_time.csv");
         boolean fileExists = file.exists();
 
         try (FileWriter writer = new FileWriter(file, true)) {
