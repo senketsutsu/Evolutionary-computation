@@ -5,6 +5,7 @@ import lab.tsp.RandomSolution;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class SteepestLocalSearch {
 
@@ -13,10 +14,19 @@ public class SteepestLocalSearch {
         double bestCost = RandomSolution.calculateCost(currentSolution, distanceMatrix, nodes);
         boolean improvement = true;
         int iterationCount = 0;
-        int maxIterations = 1000;
+        int maxIterations = 200000;
+        Random random = new Random();
 
         while (improvement && iterationCount < maxIterations) {
             improvement = false;
+
+            int binary = random.nextInt(2);
+            if(binary == 0){
+                moveType = "intra";
+            }else{
+                moveType = "inter";
+            }
+
             double bestDelta = 0;
             int bestI = -1, bestJ = -1;
             boolean isInterRouteMove = false;

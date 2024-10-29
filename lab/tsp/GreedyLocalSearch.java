@@ -3,6 +3,7 @@ package lab.tsp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class GreedyLocalSearch {
 
@@ -11,10 +12,17 @@ public class GreedyLocalSearch {
         double currentCost = RandomSolution.calculateCost(currentSolution, distanceMatrix, nodes);
         boolean improvement = true;
         int iterationCount = 0;
-        int maxIterations = 1000;
+        int maxIterations = 200000;
+        Random random = new Random();
 
         while (improvement && iterationCount < maxIterations) {
             improvement = false;
+            int binary = random.nextInt(2);
+            if(binary == 0){
+                moveType = "intra";
+            }else{
+                moveType = "inter";
+            }
 
             // Generate possible intra and inter moves based on the specified moveType
             List<int[]> intraMoves = moveType.equals("intra") || moveType.equals("both") ? generateIntraMoves(currentSolution.size()) : Collections.emptyList();
