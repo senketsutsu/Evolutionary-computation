@@ -14,7 +14,7 @@ public class SteepestLocalSearch {
         double bestCost = RandomSolution.calculateCost(currentSolution, distanceMatrix, nodes);
         boolean improvement = true;
         int iterationCount = 0;
-        int maxIterations = 200000;
+        int maxIterations = 20000000;
         Random random = new Random();
 
         while (improvement && iterationCount < maxIterations) {
@@ -84,10 +84,25 @@ public class SteepestLocalSearch {
 
     private void applyIntraMove(List<Integer> solution, int i, int j, String moveVariant) {
         if (moveVariant.equals("two-nodes")) {
+            // Swap the two nodes directly
             Collections.swap(solution, i, j);
         } else if (moveVariant.equals("two-edges")) {
-            Collections.swap(solution, i, j);
-            Collections.swap(solution, (i + 1) % solution.size(), (j + 1) % solution.size());
+            // Ensure i is less than j for swapping
+            if (i > j) {
+                int temp = i;
+                i = j;
+                j = temp;
+            }
+
+            // Reverse the segment of the list between indices i and j
+            int left = i + 1; // start right after i
+            int right = j;    // end at j
+
+            while (left < right) {
+                Collections.swap(solution, left, right);
+                left++;
+                right--;
+            }
         }
     }
 
