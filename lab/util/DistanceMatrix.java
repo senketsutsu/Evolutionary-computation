@@ -16,7 +16,7 @@ public class DistanceMatrix {
                 if (i != j) {
                     double dx = nodes[i][0] - nodes[j][0]; // x coordinates difference
                     double dy = nodes[i][1] - nodes[j][1]; // y coordinates difference
-                    distanceMatrix[i][j] = Math.round(Math.sqrt(dx * dx + dy * dy)); // Euclidean distance rounded to nearest integer
+                    distanceMatrix[i][j] = Math.round(Math.sqrt(dx * dx + dy * dy) + 0.5); // =ZAOKR.DO.CAŁK(PIERWIASTEK((G3-G4)*(G3-G4)+(H3-H4)*(H3-H4)) +0.5)
                 } else {
                     distanceMatrix[i][j] = 0; // Distance to self
                 }

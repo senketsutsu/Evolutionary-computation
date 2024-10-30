@@ -15,7 +15,7 @@ public class GreedyLocalSearch {
         int maxIterations = 20000000;
         Random random = new Random();
 
-        while (improvement && iterationCount < maxIterations) {
+        while (improvement){ //&& iterationCount < maxIterations) {
             improvement = false;
             int binary = random.nextInt(2);
             if(binary == 0){

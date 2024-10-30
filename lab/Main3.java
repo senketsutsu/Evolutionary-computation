@@ -15,7 +15,7 @@ import lab.util.DistanceMatrix;
 
 public class Main3 {
     public static void main(String[] args) throws IOException {
-        double[][] nodes = CSVReader.readCSV("data/TSPA.csv");
+        double[][] nodes = CSVReader.readCSV("data/TSPB.csv");
         double[][] distanceMatrix = DistanceMatrix.calculateDistanceMatrix(nodes);
         int numNodes = nodes.length;
 
