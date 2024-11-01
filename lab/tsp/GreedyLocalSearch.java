@@ -11,11 +11,9 @@ public class GreedyLocalSearch {
         List<Integer> currentSolution = new ArrayList<>(initialSolution);
         double currentCost = RandomSolution.calculateCost(currentSolution, distanceMatrix, nodes);
         boolean improvement = true;
-        int iterationCount = 0;
-        int maxIterations = 20000000;
         Random random = new Random();
 
-        while (improvement){ //&& iterationCount < maxIterations) {
+        while (improvement){
             improvement = false;
             int binary = random.nextInt(2);
             if(binary == 0){
@@ -25,14 +23,13 @@ public class GreedyLocalSearch {
             }
 
             // Generate possible intra and inter moves based on the specified moveType
-            List<int[]> intraMoves = moveType.equals("intra") || moveType.equals("both") ? generateIntraMoves(currentSolution.size()) : Collections.emptyList();
-            List<int[]> interMoves = moveType.equals("inter") || moveType.equals("both") ? generateInterMoves(currentSolution, nodes.length) : Collections.emptyList();
+            List<int[]> intraMoves = moveType.equals("intra") ? generateIntraMoves(currentSolution.size()) : Collections.emptyList();
+            List<int[]> interMoves = moveType.equals("inter") ? generateInterMoves(currentSolution, nodes.length) : Collections.emptyList();
 
             // Shuffle the moves to ensure randomness
             Collections.shuffle(intraMoves);
             Collections.shuffle(interMoves);
 
-            // TODO: Add random binary if that selects which move is done
 
             // Check for intra-route improvements first
             for (int[] move : intraMoves) {
@@ -65,7 +62,6 @@ public class GreedyLocalSearch {
                     }
                 }
             }
-            iterationCount++;
         }
         return currentSolution; // Return the optimized solution
     }
