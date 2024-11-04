@@ -22,43 +22,43 @@ public class GreedyLocalSearch {
                 moveType = "inter";
             }
 
-            // Generate possible intra and inter moves based on the specified moveType
-            List<int[]> intraMoves = moveType.equals("intra") ? generateIntraMoves(currentSolution.size()) : Collections.emptyList();
-            List<int[]> interMoves = moveType.equals("inter") ? generateInterMoves(currentSolution, nodes.length) : Collections.emptyList();
-
-            // Shuffle the moves to ensure randomness
-            Collections.shuffle(intraMoves);
-            Collections.shuffle(interMoves);
-
 
             // Check for intra-route improvements first
-            for (int[] move : intraMoves) {
-                double delta;
-                // Determine the delta based on the type of intra-move
-                if (moveVariant.equals("two-nodes")) {
-                    delta = SteepestLocalSearch.calculateTwoNodesExchangeDelta(currentSolution, move[0], move[1], distanceMatrix);
-                } else {
-                    delta = SteepestLocalSearch.calculateTwoEdgesExchangeDelta(currentSolution, move[0], move[1], distanceMatrix);
-                }
-                // If the move improves the solution, apply it
-                if (delta < 0) {
-                    applyIntraMove(currentSolution, move[0], move[1], moveVariant);
-                    currentCost += delta;
-                    improvement = true;
-                    break; // Break to restart the search after applying an improvement
+            if(moveType.equals("intra")) {
+                List<int[]> intraMoves = generateIntraMoves(currentSolution.size());
+                Collections.shuffle(intraMoves);
+                for (int[] move : intraMoves) {
+                    double delta;
+                    // Determine the delta based on the type of intra-move
+                    if (moveVariant.equals("two-nodes")) {
+                        delta = SteepestLocalSearch.calculateTwoNodesExchangeDelta(currentSolution, move[0], move[1], distanceMatrix);
+                    } else {
+                        delta = SteepestLocalSearch.calculateTwoEdgesExchangeDelta(currentSolution, move[0], move[1], distanceMatrix);
+                    }
+                    // If the move improves the solution, apply it
+                    if (delta < 0) {
+                        applyIntraMove(currentSolution, move[0], move[1], moveVariant);
+                        currentCost += delta;
+                        improvement = true;
+                        break; // Break to restart the search after applying an improvement
+                    }
                 }
             }
 
             // If no intra-route improvement was found, check for inter-route improvements
             if (!improvement) {
-                for (int[] move : interMoves) {
-                    double delta = SteepestLocalSearch.calculateSingleNodeChangeDelta(currentSolution, move[0], move[1], distanceMatrix, nodes);
-                    // If the inter-route move improves the solution, apply it
-                    if (delta < 0) {
-                        currentSolution.set(move[0], move[1]);
-                        currentCost += delta;
-                        improvement = true;
-                        break; // Break to restart the search after applying an improvement
+                if(moveType.equals("inter")) {
+                    List<int[]> interMoves = generateInterMoves(currentSolution, nodes.length);
+                    Collections.shuffle(interMoves);
+                    for (int[] move : interMoves) {
+                        double delta = SteepestLocalSearch.calculateSingleNodeChangeDelta(currentSolution, move[0], move[1], distanceMatrix, nodes);
+                        // If the inter-route move improves the solution, apply it
+                        if (delta < 0) {
+                            currentSolution.set(move[0], move[1]);
+                            currentCost += delta;
+                            improvement = true;
+                            break; // Break to restart the search after applying an improvement
+                        }
                     }
                 }
             }

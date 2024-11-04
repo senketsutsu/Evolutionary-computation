@@ -49,7 +49,7 @@ public class SteepestLocalSearch {
                 }
             }
 
-            if (moveType.equals("inter") || moveType.equals("both")) {
+            if (moveType.equals("inter") || moveType.equals("both") || bestDelta == 0) {
                 List<Integer> unselectedNodes = getUnselectedNodes(currentSolution, nodes.length);
                 for (int i = 0; i < currentSolution.size(); i++) {
                     for (int node : unselectedNodes) {
@@ -154,9 +154,19 @@ public class SteepestLocalSearch {
         int prevB = currentSolution.get((j - 1 + currentSolution.size()) % currentSolution.size());
         int nextB = currentSolution.get((j + 1) % currentSolution.size());
 
-        double originalCost = distanceMatrix[prevA][nodeA] + distanceMatrix[nodeA][nextA] + distanceMatrix[prevB][nodeB] + distanceMatrix[nodeB][nextB];
-        double newCost = distanceMatrix[prevA][nodeB] + distanceMatrix[nodeB][nextA] + distanceMatrix[prevB][nodeA] + distanceMatrix[nodeA][nextB];
-
-        return newCost - originalCost;
+        if (Math.abs(i - j) == 1 || Math.abs(i - j) == currentSolution.size() - 1) {
+            // Handle adjacent nodes (where swapping could impact fewer edges)
+            // If `i` and `j` are consecutive, we adjust the calculation to avoid double-counting edges.
+            double originalCost = distanceMatrix[prevA][nodeA] + distanceMatrix[nodeA][nodeB] + distanceMatrix[nodeB][nextB];
+            double newCost = distanceMatrix[prevA][nodeB] + distanceMatrix[nodeB][nodeA] + distanceMatrix[nodeA][nextB];
+            return newCost - originalCost;
+        } else {
+            // Handle non-adjacent nodes (standard case)
+            double originalCost = distanceMatrix[prevA][nodeA] + distanceMatrix[nodeA][nextA]
+                    + distanceMatrix[prevB][nodeB] + distanceMatrix[nodeB][nextB];
+            double newCost = distanceMatrix[prevA][nodeB] + distanceMatrix[nodeB][nextA]
+                    + distanceMatrix[prevB][nodeA] + distanceMatrix[nodeA][nextB];
+            return newCost - originalCost;
+        }
     }
 }
