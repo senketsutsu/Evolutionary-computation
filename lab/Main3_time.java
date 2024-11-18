@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
 import lab.tsp.RandomSolution;
 import lab.tsp.SteepestLocalSearch;
 import lab.tsp.GreedyWeighted;
@@ -13,6 +15,8 @@ import lab.tsp.GreedyLocalSearch;
 import lab.tsp.CandidateMoves;
 import lab.util.CSVReader;
 import lab.util.DistanceMatrix;
+import lab.tsp.SteepestLocalSearchWithMoveEvaluations; // New class
+import lab.tsp.SteepestLocalSearchWithCandidates;
 
 public class Main3_time {
     public static void main(String[] args) throws IOException {
@@ -62,7 +66,10 @@ public class Main3_time {
 
         SteepestLocalSearch steepestLocalSearch = new SteepestLocalSearch();
         GreedyLocalSearch greedyLocalSearch = new GreedyLocalSearch();
-        CandidateMoves candidateMoves = new CandidateMoves();
+        SteepestLocalSearchWithCandidates steepestLocalSearchCandidate = new SteepestLocalSearchWithCandidates();
+        SteepestLocalSearchWithMoveEvaluations steepestLocalSearchWithMoveEvaluations = new SteepestLocalSearchWithMoveEvaluations();
+
+        Map<Integer, List<Integer>> candidateEdges = steepestLocalSearchCandidate.generateCandidateEdges(distanceMatrix, nodes);
 
         numNodes = 200;
 
@@ -89,7 +96,7 @@ public class Main3_time {
             System.out.print("+");
             // Steepest Local Search with Candidate Moves
             startTime = System.nanoTime();
-            List<Integer> candidateMovesSolution = candidateMoves.optimize(initialSolution, distanceMatrix, nodes, "both", "two-edges");
+            List<Integer> candidateMovesSolution = steepestLocalSearchCandidate.optimize(initialSolution, distanceMatrix, nodes, "two-edges", candidateEdges);
             endTime = System.nanoTime();
             elapsedTime = (endTime - startTime) / 1e6;
             double costCandidateMoves = elapsedTime;
@@ -172,7 +179,7 @@ public class Main3_time {
             System.out.print("+");
             // Steepest Local Search with Candidate Moves
             startTime = System.nanoTime();
-            List<Integer> candidateMovesSolution1 = candidateMoves.optimize(initialSolution, distanceMatrix, nodes, "both", "two-edges");
+            List<Integer> candidateMovesSolution1 = steepestLocalSearchCandidate.optimize(initialSolution, distanceMatrix, nodes, "two-edges", candidateEdges);
             endTime = System.nanoTime();
             elapsedTime = (endTime - startTime) / 1e6;
             double costCandidateMoves = elapsedTime;

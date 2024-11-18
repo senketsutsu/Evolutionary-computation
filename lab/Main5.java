@@ -1,19 +1,21 @@
 package lab;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.*;
-
 import lab.tsp.RandomSolution;
-import lab.tsp.SteepestLocalSearch;
+import lab.tsp.SteepestLocalSearchWithMoveEvaluations; // New class
 import lab.tsp.SteepestLocalSearchWithCandidates;
-import lab.tsp.GreedyWeighted;
-import lab.tsp.GreedyLocalSearch;
+import lab.tsp.SteepestLocalSearch;
 import lab.util.CSVReader;
 import lab.util.DistanceMatrix;
 
-public class Main4 {
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+public class Main5 {
     public static void main(String[] args) throws IOException {
         // Experiment parameters
         double[][] nodes = CSVReader.readCSV("data/TSPB.csv");
@@ -23,20 +25,24 @@ public class Main4 {
         int candidateCount = 10;
         int numRuns = 200;
         int nodesToSelect = (int) Math.ceil(numNodes / 2.0);
-        File bestPaths = new File("output/best_paths_local_search.csv");
 
         // Results storage
         double minSteepestLocalSearch = Double.MAX_VALUE;
         double minsteepestLocalSearchCandidate = Double.MAX_VALUE;
+        double minsteepestLocalSearchWithMoveEvaluations = Double.MAX_VALUE;
         List<Integer> SteepestLocalSearch_path = new ArrayList<>();
         List<Integer> steepestLocalSearchCandidate_path = new ArrayList<>();
+        List<Integer> steepestLocalSearchWithMoveEvaluations_path = new ArrayList<>();
         List<Double> baselineCosts = new ArrayList<>();
         List<Double> candidateCosts = new ArrayList<>();
+        List<Double> moveEvalCosts = new ArrayList<>(); // New list for SteepestLocalSearchWithMoveEvaluations
         long baselineTotalTime = 0;
         long candidateTotalTime = 0;
+        long moveEvalTotalTime = 0; // New variable to track total time for move evaluations
 
         SteepestLocalSearch steepestLocalSearch = new SteepestLocalSearch();
         SteepestLocalSearchWithCandidates steepestLocalSearchCandidate = new SteepestLocalSearchWithCandidates();
+        SteepestLocalSearchWithMoveEvaluations steepestLocalSearchWithMoveEvaluations = new SteepestLocalSearchWithMoveEvaluations(); // New instance
         Map<Integer, List<Integer>> candidateEdges = steepestLocalSearchCandidate.generateCandidateEdges(distanceMatrix, nodes);
 
         // Run experiments
@@ -44,12 +50,12 @@ public class Main4 {
             System.out.printf("Run %d/%d...\n", run + 1, numRuns);
 
             // Generate a random initial solution
-            List<Integer> initialSolution = RandomSolution.generateRandomSolution(nodes.length);
+            List<Integer> initialSolution = RandomSolution.generateRandomSolution(numNodes);
             System.out.println("step1");
 
-
+            // Baseline Steepest Local Search
             long startTime = System.nanoTime();
-            List<Integer> baselineSolution = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", "two-edges");
+            List<Integer> baselineSolution = steepestLocalSearch.optimize(initialSolution, distanceMatrix, nodes, "both", moveVariant);
             long endTime = System.nanoTime();
             double baselineCost = RandomSolution.calculateCost(baselineSolution, distanceMatrix, nodes);
             baselineCosts.add(baselineCost);
@@ -59,24 +65,37 @@ public class Main4 {
             if (minSteepestLocalSearch == baselineCost) {
                 SteepestLocalSearch_path = baselineSolution;
             }
-
             System.out.println("step2");
 
-
+            // Steepest Local Search with Candidates
             startTime = System.nanoTime();
-            List<Integer> candidateSolution = steepestLocalSearchCandidate.optimize(initialSolution, distanceMatrix, nodes, "both", candidateEdges);
+            List<Integer> candidateSolution = steepestLocalSearchCandidate.optimize(initialSolution, distanceMatrix, nodes, moveVariant, candidateEdges);
             endTime = System.nanoTime();
-            elapsedTime = (endTime - startTime) / 1e6;
             double candidateCost = RandomSolution.calculateCost(candidateSolution, distanceMatrix, nodes);
             candidateCosts.add(candidateCost);
+            elapsedTime = (endTime - startTime) / 1e6;
             candidateTotalTime += elapsedTime;
             minsteepestLocalSearchCandidate = Math.min(minsteepestLocalSearchCandidate, candidateCost);
             if (minsteepestLocalSearchCandidate == candidateCost) {
                 steepestLocalSearchCandidate_path = baselineSolution;
             }
-            System.out.println("step2");
+            System.out.println("step3");
+
+            // Steepest Local Search with Move Evaluations
+            startTime = System.nanoTime();
+            List<Integer> moveEvalSolution = steepestLocalSearchWithMoveEvaluations.optimize(initialSolution, distanceMatrix, candidateEdges, moveVariant, nodes); // Updated call to the new method
+            endTime = System.nanoTime();
+            elapsedTime = (endTime - startTime) / 1e6;
+            double moveEvalCost = RandomSolution.calculateCost(moveEvalSolution, distanceMatrix, nodes);
+            moveEvalCosts.add(moveEvalCost);
+            moveEvalTotalTime += elapsedTime;
+            minsteepestLocalSearchWithMoveEvaluations = Math.min(minsteepestLocalSearchWithMoveEvaluations, moveEvalCost);
+            if (minsteepestLocalSearchWithMoveEvaluations == moveEvalCost) {
+                steepestLocalSearchWithMoveEvaluations_path = baselineSolution;
+            }
         }
 
+        File bestPaths = new File("output/best_paths_local_search.csv");
         try (FileWriter writer = new FileWriter(bestPaths, true)) {
             writer.write("SteepestLocalSearch");
             for (int node : SteepestLocalSearch_path) writer.write("," + node);
@@ -84,12 +103,17 @@ public class Main4 {
 
             writer.write("steepestLocalSearchCandidate");
             for (int node : steepestLocalSearchCandidate_path) writer.write("," + node);
+            writer.write("\n");
+
+            writer.write("steepestLocalSearchWithMoveEvaluations");
+            for (int node : steepestLocalSearchWithMoveEvaluations_path) writer.write("," + node);
             writer.write("\n");}
 
         // Print results
         System.out.println("\n=== Results ===");
         printResults("Baseline Steepest Local Search", baselineCosts, baselineTotalTime, numRuns);
         printResults("Steepest Local Search with Candidate Moves", candidateCosts, candidateTotalTime, numRuns);
+        printResults("Steepest Local Search with Move Evaluations", moveEvalCosts, moveEvalTotalTime, numRuns); // New results
     }
 
     private static void printResults(String methodName, List<Double> costs, long totalTime, int numRuns) {

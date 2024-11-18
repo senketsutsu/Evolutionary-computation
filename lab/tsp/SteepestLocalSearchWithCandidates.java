@@ -98,7 +98,7 @@ public class SteepestLocalSearchWithCandidates {
         return candidateEdges.get(currentNode).contains(newNode);
     }
 
-    private void applyIntraMove(List<Integer> solution, int i, int j, String moveVariant) {
+    public static void applyIntraMove(List<Integer> solution, int i, int j, String moveVariant) {
         if (moveVariant.equals("two-nodes")) {
             Collections.swap(solution, i, j);
         } else if (moveVariant.equals("two-edges")) {
