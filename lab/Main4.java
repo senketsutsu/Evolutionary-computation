@@ -64,7 +64,7 @@ public class Main4 {
 
 
             startTime = System.nanoTime();
-            List<Integer> candidateSolution = steepestLocalSearchCandidate.optimize(initialSolution, distanceMatrix, nodes, "both", candidateEdges);
+            List<Integer> candidateSolution = steepestLocalSearchCandidate.optimize(initialSolution, distanceMatrix, nodes, candidateEdges, moveVariant);
             endTime = System.nanoTime();
             elapsedTime = (endTime - startTime) / 1e6;
             double candidateCost = RandomSolution.calculateCost(candidateSolution, distanceMatrix, nodes);

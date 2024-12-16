@@ -96,7 +96,7 @@ public class Main3_time {
             System.out.print("+");
             // Steepest Local Search with Candidate Moves
             startTime = System.nanoTime();
-            List<Integer> candidateMovesSolution = steepestLocalSearchCandidate.optimize(initialSolution, distanceMatrix, nodes, "two-edges", candidateEdges);
+            List<Integer> candidateMovesSolution = steepestLocalSearchCandidate.optimize(initialSolution, distanceMatrix, nodes, candidateEdges, "two-edges");
             endTime = System.nanoTime();
             elapsedTime = (endTime - startTime) / 1e6;
             double costCandidateMoves = elapsedTime;
@@ -179,7 +179,7 @@ public class Main3_time {
             System.out.print("+");
             // Steepest Local Search with Candidate Moves
             startTime = System.nanoTime();
-            List<Integer> candidateMovesSolution1 = steepestLocalSearchCandidate.optimize(initialSolution, distanceMatrix, nodes, "two-edges", candidateEdges);
+            List<Integer> candidateMovesSolution1 = steepestLocalSearchCandidate.optimize(initialSolution, distanceMatrix, nodes, candidateEdges, "two-edges");
             endTime = System.nanoTime();
             elapsedTime = (endTime - startTime) / 1e6;
             double costCandidateMoves = elapsedTime;

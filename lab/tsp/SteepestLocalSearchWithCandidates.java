@@ -2,55 +2,60 @@ package lab.tsp;
 
 import java.util.*;
 
-import static lab.tsp.SteepestLocalSearch.calculateTwoNodesExchangeDelta;
-
 public class SteepestLocalSearchWithCandidates {
 
-    private static final int CANDIDATE_COUNT = 10; // Number of nearest neighbors
+    private static final int CANDIDATE_COUNT = 10;
 
-    public List<Integer> optimize(List<Integer> initialSolution, double[][] distanceMatrix, double[][] nodes, String moveVariant, Map<Integer, List<Integer>> candidateEdges) {
+    public List<Integer> optimize(List<Integer> initialSolution, double[][] distanceMatrix, double[][] nodes, Map<Integer, List<Integer>> candidateEdges, String moveVariant) {
         List<Integer> currentSolution = new ArrayList<>(initialSolution);
-        HashSet<Integer> currentSolutionSet = new HashSet<>(initialSolution);
         double bestCost = RandomSolution.calculateCost(currentSolution, distanceMatrix, nodes);
         boolean improvement = true;
 
         while (improvement) {
             improvement = false;
             double bestDelta = 0;
-            int bestI = -1, bestJ = -1;
+            int[] bestI = new int[0], bestJ = new int[0];
             boolean isInterRouteMove = false;
 
             for (int i = 0; i < currentSolution.size(); i++) {
                 int node = currentSolution.get(i);
                 List<Integer> candidates = candidateEdges.getOrDefault(node, Collections.emptyList());
 
-                // Intra-route moves
+                // Check intra-route candidate moves
                 for (int candidate : candidates) {
-                    if (currentSolutionSet.contains(candidate)) {
-                        //if (Math.abs(i - currentSolution.indexOf(candidate)) <= 1) continue;
-
+                    if (currentSolution.contains(candidate)) {
                         int j = currentSolution.indexOf(candidate);
-                        if (j >= 0 && j < currentSolution.size()) {
-
-                            double delta = calculateTwoEdgesExchangeDelta(currentSolution, i, j, distanceMatrix);
-
-                            if (delta < bestDelta) {
-                                bestDelta = delta;
-                                bestI = i;
-                                bestJ = j;
-                                isInterRouteMove = false;
+                        if (Math.abs(i - j) > 1 && j != -1) { // Avoid trivial moves
+                            List<int[][]> moves = getEdgeMoves(currentSolution, i, j);
+                            for(int[][] move : moves){
+                                if (isValidMove(move, currentSolution.size())) {
+                                    int[] move_i = move[0];
+                                    int[] move_j = move[1];
+                                    double delta = calculateEdgeExchangeDelta(currentSolution, move_i, move_j, distanceMatrix, nodes);
+                                    if (delta < bestDelta) {
+                                        bestDelta = delta;
+                                        bestI = move_i;
+                                        bestJ = move_j;
+                                        isInterRouteMove = false;
+                                    }
+                                }
                             }
                         }
-                    } else {
-
-                        double delta = calculateSingleNodeChangeDelta(currentSolution, i, candidate, distanceMatrix, nodes);
-                        if (delta < bestDelta) {
-                            bestDelta = delta;
-                            bestI = i;
-                            bestJ = candidate;
-                            isInterRouteMove = true;
+                    }else{
+                        List<int[][]> moves = getNodeMoves(currentSolution, i, candidate);
+                        for(int[][] move : moves) {
+                            if (isValidMove(move, currentSolution.size())) {
+                                int[] move_i = move[0];
+                                int[] move_j = move[1];
+                                double delta = calculateNodeInsertionDelta(currentSolution, move_i[0], move_j[0], distanceMatrix, nodes);
+                                if (delta < bestDelta) {
+                                    bestDelta = delta;
+                                    bestI = move_i;
+                                    bestJ = move_j;
+                                    isInterRouteMove = true;
+                                }
+                            }
                         }
-
                     }
                 }
             }
@@ -58,104 +63,141 @@ public class SteepestLocalSearchWithCandidates {
             // Apply the best move found
             if (bestDelta < 0) {
                 if (isInterRouteMove) {
-                    currentSolution.set(bestI, bestJ);
-                    currentSolutionSet.remove(currentSolution.get(bestI));
-                    currentSolutionSet.add(bestJ);
+                    int replacedNode = currentSolution.set(bestI[0], bestJ[0]); // Replace node for inter-route move
+                    // System.out.printf("Replaced node %d with %d.\n", replacedNode, bestJ);
                 } else {
-                    applyIntraMove(currentSolution, bestI, bestJ, moveVariant);
+                    applyEdgeExchange(currentSolution, bestI, bestJ, moveVariant);
                 }
                 bestCost += bestDelta;
-                improvement = true;
+                improvement = true; // Continue searching for improvements
             }
         }
+
         return currentSolution;
     }
 
+    /**
+     * Generates candidate edges considering both distance and node attributes.
+     */
     public Map<Integer, List<Integer>> generateCandidateEdges(double[][] distanceMatrix, double[][] nodes) {
         Map<Integer, List<Integer>> candidateEdges = new HashMap<>();
-        for (int i = 0; i < nodes.length; i++) {
+        int numNodes = nodes.length;
+
+        for (int i = 0; i < numNodes; i++) {
             List<Integer> nearest = new ArrayList<>();
-            for (int j = 0; j < nodes.length; j++) {
-                if (i != j) {
-                    nearest.add(j);
-                }
+            for (int j = 0; j < numNodes; j++) {
+                if (i != j) nearest.add(j);
             }
             int finalI = i;
-            nearest.sort(Comparator.comparingDouble(j -> distanceMatrix[finalI][j] + nodes[j][2]));
+            nearest.sort(Comparator.comparingDouble(j -> distanceMatrix[finalI][j] + nodes[j][2])); // Combined cost metric
             candidateEdges.put(i, nearest.subList(0, Math.min(CANDIDATE_COUNT, nearest.size())));
         }
+
         return candidateEdges;
     }
 
-    private boolean introducesCandidateEdge(List<Integer> solution, int i, int j, Map<Integer, List<Integer>> candidateEdges) {
-        int nodeA = solution.get(i);
-        int nodeB = solution.get(j);
-        return candidateEdges.get(nodeA).contains(nodeB) || candidateEdges.get(nodeB).contains(nodeA);
+    private boolean isValidMove(int[][] move, int size) {
+        return Arrays.stream(move)
+                .flatMapToInt(Arrays::stream)
+                .allMatch(index -> index >= 0 && index < size);
     }
 
-    private boolean introducesCandidateEdgeForInterRoute(List<Integer> solution, int i, int newNode, Map<Integer, List<Integer>> candidateEdges) {
-        int currentNode = solution.get(i);
-        return candidateEdges.get(currentNode).contains(newNode);
-    }
-
-    public static void applyIntraMove(List<Integer> solution, int i, int j, String moveVariant) {
-        if (moveVariant.equals("two-nodes")) {
-            Collections.swap(solution, i, j);
-        } else if (moveVariant.equals("two-edges")) {
-            if (i > j) {
-                int temp = i;
-                i = j;
-                j = temp;
-            }
-            int left = i + 1, right = j;
-            while (left < right) {
-                Collections.swap(solution, left, right);
-                left++;
-                right--;
-            }
+    /**
+     * Applies an edge exchange (or two-edge reversal) between two indices in the solution.
+     */
+    public static void applyEdgeExchange(List<Integer> solution, int[] i, int[] j, String moveVariant) {
+        if (i[0] > j[0] || (i[0] == j[0] && i[1] > j[1])) {
+            int[] temp = i;
+            i = j;
+            j = temp;
         }
+        int left = solution.indexOf(i[1]) + 1;
+        int right = solution.indexOf(j[0]);
+
+        while (left < right) {
+            Collections.swap(solution, left, right);
+            left++;
+            right--;
+        }
+
     }
 
-    public static double calculateTwoEdgesExchangeDelta(List<Integer> currentSolution, int i, int j, double[][] distanceMatrix) {
-        int nodeA1 = currentSolution.get(i);
-        int nodeA2 = currentSolution.get((i + 1) % currentSolution.size());
-        int nodeB1 = currentSolution.get(j);
-        int nodeB2 = currentSolution.get((j + 1) % currentSolution.size());
 
-        double originalCost = distanceMatrix[nodeA1][nodeA2] + distanceMatrix[nodeB1][nodeB2];
-        double newCost = distanceMatrix[nodeA1][nodeB1] + distanceMatrix[nodeA2][nodeB2];
+
+    /**
+     * Calculates the delta for exchanging edges between two nodes.
+     */
+
+    public static double calculateEdgeExchangeDelta(List<Integer> solution, int[] i, int[] j, double[][] distanceMatrix, double[][] nodes) {
+        int nodeA1 = solution.indexOf(i[0]);
+        int nodeA2 = solution.indexOf(i[1]);
+        int nodeB1 = solution.indexOf(j[0]);
+        int nodeB2 = solution.indexOf(j[1]);
+
+        double originalCost = distanceMatrix[i[0]][i[1]] + distanceMatrix[j[0]][j[1]];
+        double newCost = distanceMatrix[i[0]][j[0]] + distanceMatrix[i[1]][j[1]];
+
+        // No change in node costs for intra-route edge exchange
+        return newCost - originalCost;
+    }
+
+    /**
+     * Calculates the delta for inserting a new node (inter-route move).
+     */
+    public static double calculateNodeInsertionDelta(List<Integer> solution, int index, int newNode, double[][] distanceMatrix, double[][] nodes) {
+
+        int prevNode = solution.get((index - 1 + solution.size()) % solution.size());
+        int nextNode = solution.get(((index + 1) % solution.size()));
+        //System.out.println(prevNode+" "+index+" "+nextNode);
+        int currentNode = solution.get(index);
+
+
+
+        double originalCost = distanceMatrix[prevNode][currentNode] + distanceMatrix[currentNode][nextNode] + nodes[currentNode][2];
+        double newCost = distanceMatrix[prevNode][newNode] + distanceMatrix[newNode][nextNode] + nodes[newNode][2];
 
         return newCost - originalCost;
     }
 
-    public static double calculateSingleNodeChangeDelta(List<Integer> currentSolution, int index, int newNode, double[][] distanceMatrix, double[][] nodes) {
-        int currentNode = currentSolution.get(index);
-        double currentNodeCost = nodes[currentNode][2];
-        double newNodeCost = nodes[newNode][2];
-        double costChange = newNodeCost - currentNodeCost;
+    public static List<int[][]> getEdgeMoves(List<Integer> solution, int nodeIndex, int candidateIndex) {
+        List<int[][]> moves = new ArrayList<>();
+        int n = solution.size();
 
-        if (index == 0) {
-            double originalCost = distanceMatrix[currentNode][currentSolution.get(index + 1)];
-            double newCost = distanceMatrix[newNode][currentSolution.get(index + 1)];
-            return costChange + (newCost - originalCost);
-        } else if (index == currentSolution.size() - 1) {
-            double originalCost = distanceMatrix[currentSolution.get(index - 1)][currentNode];
-            double newCost = distanceMatrix[currentSolution.get(index - 1)][newNode];
-            return costChange + (newCost - originalCost);
-        } else {
-            double originalCost = distanceMatrix[currentSolution.get(index - 1)][currentNode] + distanceMatrix[currentNode][currentSolution.get(index + 1)];
-            double newCost = distanceMatrix[currentSolution.get(index - 1)][newNode] + distanceMatrix[newNode][currentSolution.get(index + 1)];
-            return costChange + (newCost - originalCost);
-        }
+        //  (solution[nodeIndex], solution[(nodeIndex+1)%n]) and (solution[candidateIndex], solution[(candidateIndex+1)%n])
+        int[][] move1 = {
+                {solution.get(nodeIndex), solution.get((nodeIndex + 1) % n)},
+                {solution.get(candidateIndex), solution.get((candidateIndex + 1) % n)}
+        };
+        moves.add(move1);
+
+        //  (solution[nodeIndex-1], solution[nodeIndex]) and (solution[candidateIndex-1], solution[candidateIndex])
+        int[][] move2 = {
+                {solution.get((nodeIndex - 1 + n) % n), solution.get(nodeIndex)},
+                {solution.get((candidateIndex - 1 + n) % n), solution.get(candidateIndex)}
+        };
+        moves.add(move2);
+
+        return moves;
     }
 
-    public static List<Integer> getUnselectedNodes(List<Integer> currentSolution, int numNodes) {
-        List<Integer> allNodes = new ArrayList<>();
-        for (int i = 0; i < numNodes; i++) {
-            if (!currentSolution.contains(i)) {
-                allNodes.add(i);
-            }
-        }
-        return allNodes;
+    public static List<int[][]> getNodeMoves(List<Integer> solution, int nodeIndex, int candidateIndex) {
+        List<int[][]> moves = new ArrayList<>();
+        int n = solution.size();
+
+        //  (solution[(node_index+1)%n], candidate)
+        int[][] move1 = {
+                {solution.get((nodeIndex + 1) % n), solution.get((nodeIndex + 1) % n)},
+                {candidateIndex, candidateIndex}
+        };
+        moves.add(move1);
+
+        //  (solution[node_index-1], candidate)
+        int[][] move2 = {
+                {solution.get((nodeIndex - 1 + n) % n), solution.get((nodeIndex - 1 + n) % n)},
+                {candidateIndex, candidateIndex}
+        };
+        moves.add(move2);
+
+        return moves;
     }
 }

@@ -67,9 +67,10 @@ public class Main5 {
             }
             System.out.println("step2");
 
+            /*
             // Steepest Local Search with Candidates
             startTime = System.nanoTime();
-            List<Integer> candidateSolution = steepestLocalSearchCandidate.optimize(initialSolution, distanceMatrix, nodes, moveVariant, candidateEdges);
+            List<Integer> candidateSolution = steepestLocalSearchCandidate.optimize(initialSolution, distanceMatrix, nodes, candidateEdges, moveVariant);
             endTime = System.nanoTime();
             double candidateCost = RandomSolution.calculateCost(candidateSolution, distanceMatrix, nodes);
             candidateCosts.add(candidateCost);
@@ -78,12 +79,12 @@ public class Main5 {
             minsteepestLocalSearchCandidate = Math.min(minsteepestLocalSearchCandidate, candidateCost);
             if (minsteepestLocalSearchCandidate == candidateCost) {
                 steepestLocalSearchCandidate_path = baselineSolution;
-            }
+            } */
             System.out.println("step3");
 
             // Steepest Local Search with Move Evaluations
             startTime = System.nanoTime();
-            List<Integer> moveEvalSolution = steepestLocalSearchWithMoveEvaluations.optimize(initialSolution, distanceMatrix, candidateEdges, moveVariant, nodes); // Updated call to the new method
+            List<Integer> moveEvalSolution = steepestLocalSearchWithMoveEvaluations.optimize(initialSolution, distanceMatrix, nodes, moveVariant); // Updated call to the new method
             endTime = System.nanoTime();
             elapsedTime = (endTime - startTime) / 1e6;
             double moveEvalCost = RandomSolution.calculateCost(moveEvalSolution, distanceMatrix, nodes);
@@ -112,7 +113,7 @@ public class Main5 {
         // Print results
         System.out.println("\n=== Results ===");
         printResults("Baseline Steepest Local Search", baselineCosts, baselineTotalTime, numRuns);
-        printResults("Steepest Local Search with Candidate Moves", candidateCosts, candidateTotalTime, numRuns);
+        //printResults("Steepest Local Search with Candidate Moves", candidateCosts, candidateTotalTime, numRuns);
         printResults("Steepest Local Search with Move Evaluations", moveEvalCosts, moveEvalTotalTime, numRuns); // New results
     }
 

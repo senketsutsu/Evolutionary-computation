@@ -1,10 +1,11 @@
 package lab.tsp;
 
 import java.util.*;
+
 import static lab.tsp.SteepestLocalSearchWithCandidates.calculateEdgeExchangeDelta;
 import static lab.tsp.SteepestLocalSearchWithCandidates.calculateNodeInsertionDelta;
 
-public class SteepestLocalSearchWithMoveEvaluations {
+public class SteepestLocalSearchWithMoveEvaluations2 {
 
     private static final int CANDIDATE_COUNT = 10; // Number of nearest neighbors
 

@@ -9,9 +9,7 @@ import lab.util.DistanceMatrix;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.*;
 import java.io.File;
 import java.io.FileWriter;
 
@@ -173,5 +171,8 @@ public class Main1 {
                 }
             }
         }
+    }
+
+    public static class Main_L8 {
     }
 }
