@@ -2,16 +2,18 @@ package lab.tsp;
 
 import java.util.*;
 
-import static lab.tsp.SteepestLocalSearchWithCandidates.calculateEdgeExchangeDelta;
-import static lab.tsp.SteepestLocalSearchWithCandidates.calculateNodeInsertionDelta;
+import static lab.tsp.SteepestLocalSearchWithCandidates2.calculateEdgeExchangeDelta;
+import static lab.tsp.SteepestLocalSearchWithCandidates2.calculateNodeInsertionDelta;
 
 public class SteepestLocalSearchWithMoveEvaluations2 {
 
     private static final int CANDIDATE_COUNT = 10; // Number of nearest neighbors
+    SortedSet<Move> LM = new TreeSet<Move>(Comparator.comparingDouble(move -> move.delta));
+    List<Move> removedMoves = new ArrayList<>();
 
     public List<Integer> optimize(List<Integer> initialSolution, double[][] distanceMatrix, double[][] nodes, String moveVariant) {
         List<Integer> solution = new ArrayList<>(initialSolution);
-        SortedSet<Move> LM = new TreeSet<Move>(Comparator.comparingDouble(move -> move.delta));
+        //SortedSet<Move> LM = new TreeSet<Move>(Comparator.comparingDouble(move -> move.delta));
 
         int n = solution.size();
         int N = distanceMatrix.length;
@@ -67,24 +69,28 @@ public class SteepestLocalSearchWithMoveEvaluations2 {
 
         // Add a list of new moves that we need to evaluate (moves that were not possible before but after changing the current solution now they can occure)   TODO
 
+        // while (!LM.isEmpty()) {
         while (improved) {
             improved = false;
+            // System.out.println("Current LM size: " + LM.size());
 
             // Evaluate all new moves and add improving moves to LM TODO - done in the loop below
+            // List<Move> removedMoves = new ArrayList<>();
+            List<Move> lmCopy = new ArrayList<>(LM);
 
-            // Loop over the SortedSet (LM) to apply the best improvement
-            Iterator<Move> iterator = LM.iterator();
-            while (iterator.hasNext()) {
-                Move move = iterator.next();
+            for (Move move : lmCopy) {
                 List<Object> moveDetails = move.getMoveDetails();
                 int[] nodesArr1 = (int[]) moveDetails.get(0);
                 int[] nodesArr2 = (int[]) moveDetails.get(1);
                 // Check if m is applicable and if not remove it from LM TODO
-                boolean applicable = checkMoveValidity(solution, moveDetails, solutionSet, move.delta, distanceMatrix, nodes);
+                boolean applicable = checkMoveValidity(solution, moveDetails, solutionSet, move.delta, distanceMatrix, nodes, move);
+                // System.out.println("Evaluating move: " + moveDetails + " with delta: " + move.delta + " is applicable: " + applicable);
                 if (applicable) {
+                    // System.out.println(RandomSolution.calculateCost(solution, distanceMatrix, nodes));
                     improved = true;
                     solution = makeMove(solution, moveDetails, moveVariant, distanceMatrix, nodes);
-                    iterator.remove();  // Remove the applied move
+                    removedMoves.add(move);  // Remove the applied move
+                    //System.out.println("Move applied: " + moveDetails);
 
                     // Evaluate all new moves and add improving moves to LM
                     if(moveVariant.contains("intra")){
@@ -187,24 +193,25 @@ public class SteepestLocalSearchWithMoveEvaluations2 {
                     Integer moveStillPossible = checkMovePossibleAgain(solution, nodesArr1, nodesArr2, moveTypes);
 
                     if (moveStillPossible == 0) {
-                        iterator.remove();
+                        removedMoves.add(move);
                     } else if (moveStillPossible == 2){
-                        improved = true;
-                        iterator.remove();
-                        // solution = makeMove(solution, moveDetails, moveVariant, distanceMatrix, nodes);
-                        // LM.remove(move);
+                        // improved = true;
+
+                        removedMoves.add(move);
                     }
                 }
             }
             // if move m has been found then    TODO
             //x := m(x) (accept m(x))
+            LM.removeAll(removedMoves);
+            removedMoves.clear();
         }
 
         return solution;
     }
 
     // Checks whether a move is valid in the current solution
-    private boolean checkMoveValidity(List<Integer> solution, List<Object> moveDetails, Set<Integer> solutionSet, double delta, double[][] distanceMatrix, double[][] nodes) {
+    private boolean checkMoveValidity(List<Integer> solution, List<Object> moveDetails, Set<Integer> solutionSet, double delta, double[][] distanceMatrix, double[][] nodes, Move move) {
         int[] node1 = (int[]) moveDetails.get(0);
         int[] node2 = (int[]) moveDetails.get(1);
         String[] moveTypes = (String[]) moveDetails.get(2);
@@ -212,12 +219,22 @@ public class SteepestLocalSearchWithMoveEvaluations2 {
 
             if(moveTypes[0].contains("False")){
                 double new_delta = calculateEdgeExchangeDelta(solution, node1, node2 , distanceMatrix, nodes);
-                if (Math.abs(new_delta - delta) > 1e-6) {
+                if (new_delta <= delta) {
+                    return true;
+                }else if(new_delta < 0){
+                    Move correctedMove = new Move(new_delta, moveDetails);
+                    removedMoves.add(move);
+                    LM.add(correctedMove);
                     return false;
                 }
             }else if(moveTypes[0].contains("True")){
                 double new_delta = calculateEdgeExchangeDelta(solution, new int[]{node1[1], node1[0]}, new int[]{node2[1], node2[0]} , distanceMatrix, nodes);
-                if (Math.abs(new_delta - delta) > 1e-6) {
+                if (new_delta <= delta) {
+                    return true;
+                }else if(new_delta < 0){
+                    Move correctedMove = new Move(new_delta, moveDetails);
+                    removedMoves.add(move);
+                    LM.add(correctedMove);
                     return false;
                 }
             }
@@ -226,7 +243,12 @@ public class SteepestLocalSearchWithMoveEvaluations2 {
         } else if (moveTypes[0].contains("inter")) {
             if(!solution.contains(node2[0])){return false;}
             double new_delta = calculateNodeInsertionDelta(solution, solution.indexOf(node2[0]), node1[0], distanceMatrix, nodes);
-            if (Math.abs(new_delta - delta) > 1e-6) {
+            if (new_delta <= delta) {
+                return true;
+            }else if(new_delta < 0){
+                Move correctedMove = new Move(new_delta, moveDetails);
+                removedMoves.add(move);
+                LM.add(correctedMove);
                 return false;
             }
             return solution.contains(node2[0]) && !solution.contains(node1[0]);
@@ -239,31 +261,28 @@ public class SteepestLocalSearchWithMoveEvaluations2 {
         int[] nodesArr1 = (int[]) moveDetails.get(0);
         int[] nodesArr2 = (int[]) moveDetails.get(1);
         String[] moveTypes = (String[]) moveDetails.get(2);
+
         int nodesArr1idx = solution.indexOf(nodesArr1[0]);
         int nodesArr2idx = solution.indexOf(nodesArr2[0]);
+        //System.out.println("Making move: " + Arrays.toString(nodesArr1) + " <-> " + Arrays.toString(nodesArr2));
 
         if (moveTypes[0].contains("intra_False")) {
             // Intra-route edge exchange in the forward direction
-            if (nodesArr1idx >= 0 && nodesArr1idx < solution.size()) {
-                solution.set(nodesArr1idx, nodesArr2[0]);
-                solution.set((nodesArr1idx+1)%solution.size(), nodesArr2[1]);
-            }
-
-            if (nodesArr2idx >= 0 && nodesArr2idx < solution.size()) {
-                solution.set(nodesArr2idx, nodesArr1[0]);
-                solution.set((nodesArr2idx+1)%solution.size(), nodesArr1[1]);
-            }
+            // Use applyEdgeExchange for edge swapping between nodesArr1 and nodesArr2
+            SteepestLocalSearchWithCandidates.applyEdgeExchange(solution, nodesArr1, nodesArr2, moveVariant);
         } else if (moveTypes[0].contains("intra_True")) {
             // Intra-route edge exchange in the reverse direction
+            // We will still use the edge exchange, but the direction will be reversed
+            // So we just reverse the pairings when invoking applyEdgeExchange
+            SteepestLocalSearchWithCandidates.applyEdgeExchange(solution, nodesArr2, nodesArr1, moveVariant);
+        } else if (moveTypes[0].contains("inter")) {
+            // Inter-route move: we don't use edge exchange, instead we just set the node positions
             if (nodesArr1idx >= 0 && nodesArr1idx < solution.size()) {
                 solution.set(nodesArr1idx, nodesArr2[0]);
-                solution.set((nodesArr1idx-1+solution.size())%solution.size(), nodesArr2[1]);}
-
+            }
             if (nodesArr2idx >= 0 && nodesArr2idx < solution.size()) {
                 solution.set(nodesArr2idx, nodesArr1[0]);
-                solution.set((nodesArr2idx-1+solution.size())%solution.size(), nodesArr1[1]);}
-        } else if (moveTypes[0].contains("inter")) {
-            solution.set(nodesArr2idx, nodesArr1[0]);
+            }
         }
 
         return solution;
@@ -284,11 +303,11 @@ public class SteepestLocalSearchWithMoveEvaluations2 {
     private boolean isEdgeInDifferentDirection(List<Integer> solution, int node1, int node2) {
         int idx1 = solution.indexOf(node1);
         int idx2 = solution.indexOf(node2);
-    
+
         if (idx1 == -1 || idx2 == -1) {
             return false; // At least one of the nodes does not exist
         }
-    
+
         // Check if the edge appears in the opposite direction
         return (idx2 == (idx1 - 1 + solution.size()) % solution.size() && idx1 == (idx2 + 1) % solution.size());
     }
@@ -298,40 +317,33 @@ public class SteepestLocalSearchWithMoveEvaluations2 {
         int adjNode1 = nodesArr1[1];
         int node2 = nodesArr2[0];
         int adjNode2 = nodesArr2[1];
-    
+
         // Check if all nodes involved in the move are present in the solution
         boolean allNodesExist = solution.contains(node1) && solution.contains(adjNode1)
-                             && solution.contains(node2) && solution.contains(adjNode2);
+                && solution.contains(node2) && solution.contains(adjNode2);
         if (!allNodesExist) {
             return 0; // At least one node is missing; remove the move from LM
         }
-    
+
         // Check edge directions for intra-moves
         if (moveTypes[0].contains("intra")) {
             boolean edgesInDifferentDirection = isEdgeInDifferentDirection(solution, node1, adjNode1)
-                                             && isEdgeInDifferentDirection(solution, node2, adjNode2);    
+                    && isEdgeInDifferentDirection(solution, node2, adjNode2);
             boolean edgesInSameDirection = isEdgeInSameDirection(solution, node1, adjNode1)
-                                        && isEdgeInSameDirection(solution, node2, adjNode2);
+                    && isEdgeInSameDirection(solution, node2, adjNode2);
 
-            if ((edgesInSameDirection && moveTypes[0].contains("False")) || (edgesInDifferentDirection && moveTypes[0].contains("True"))) {
+            if (edgesInSameDirection || edgesInDifferentDirection) {
 
                 return 2;
             }
             else{
-                
+
                 return 1;
             }
         }
-    
-        // For inter-moves, simply check if the nodes are in/out of the solution appropriately
-        if (moveTypes[0].contains("inter")) {
-            // Additional logic for inter-move directionality can go here
-            return 1; // Placeholder: Assume inter-move remains valid for now
-        }
-    
-        return 0; // Default: Remove the move if no valid conditions are met
+        return 0;
     }
-    
+
 
 
 

@@ -2,13 +2,15 @@ package lab.tsp;
 
 import java.util.*;
 
-import static lab.tsp.SteepestLocalSearchWithCandidates.calculateEdgeExchangeDelta;
-import static lab.tsp.SteepestLocalSearchWithCandidates.calculateNodeInsertionDelta;
+import static lab.tsp.SteepestLocalSearchWithCandidates2.calculateEdgeExchangeDelta;
+import static lab.tsp.SteepestLocalSearchWithCandidates2.calculateNodeInsertionDelta;
+
 
 public class SteepestLocalSearchWithMoveEvaluations {
 
     private static final int CANDIDATE_COUNT = 10; // Number of nearest neighbors
     SortedSet<Move> LM = new TreeSet<Move>(Comparator.comparingDouble(move -> move.delta));
+    List<Move> removedMoves = new ArrayList<>();
 
     public List<Integer> optimize(List<Integer> initialSolution, double[][] distanceMatrix, double[][] nodes, String moveVariant) {
         List<Integer> solution = new ArrayList<>(initialSolution);
@@ -68,141 +70,42 @@ public class SteepestLocalSearchWithMoveEvaluations {
 
         // Add a list of new moves that we need to evaluate (moves that were not possible before but after changing the current solution now they can occure)   TODO
 
+        // while (!LM.isEmpty()) {
         while (improved) {
             improved = false;
 
-            // Evaluate all new moves and add improving moves to LM TODO - done in the loop below
-            List<Move> removedMoves = new ArrayList<>();
+            // Create a copy of the local moves list (LM) to iterate over safely
             List<Move> lmCopy = new ArrayList<>(LM);
 
             for (Move move : lmCopy) {
                 List<Object> moveDetails = move.getMoveDetails();
-                int[] nodesArr1 = (int[]) moveDetails.get(0);
-                int[] nodesArr2 = (int[]) moveDetails.get(1);
-                // Check if m is applicable and if not remove it from LM TODO
-                boolean applicable = checkMoveValidity(solution, moveDetails, solutionSet, move.delta, distanceMatrix, nodes);
-                //System.out.println("Evaluating move: " + moveDetails + " with delta: " + move.delta + " is applicable: " + applicable);
+
+                // Validate if the move is still applicable
+                boolean applicable = checkMoveValidity(solution, moveDetails, solutionSet, move.delta, distanceMatrix, nodes, move);
+
                 if (applicable) {
-                    System.out.println(RandomSolution.calculateCost(solution, distanceMatrix, nodes));
+                    // Apply the move and mark improvement
                     improved = true;
                     solution = makeMove(solution, moveDetails, moveVariant, distanceMatrix, nodes);
-                    removedMoves.add(move);  // Remove the applied move
-                    //System.out.println("Move applied: " + moveDetails);
+                    removedMoves.add(move); // Remove the applied move
 
-                    // Evaluate all new moves and add improving moves to LM
-                    if(moveVariant.contains("intra")){
-                        int[] new_moves = new int[]{nodesArr1[0], nodesArr1[1], nodesArr2[0], nodesArr2[1]};
-                        for (int i = 0; i < 4; i++) {
-                            for (int j = 0; j < n; j++) {
-                                // Forward direction move
-                                String moveType = "intra_False";
-                                int node1 = new_moves[i];
-                                int node2 = solution.get(j);
-                                int adjNode1 = solution.get((solution.indexOf(node1) + 1) % n);
-                                int adjNode2 = solution.get((j + 1) % n);
-                                List<Object> new_move = Arrays.asList(new int[]{node1, adjNode1}, new int[]{node2, adjNode2}, new String[]{moveType, moveType});
-                                double delta = calculateEdgeExchangeDelta(solution, new int[]{solution.indexOf(node1), (solution.indexOf(node1)+1)%n}, new int[]{j, (j+1)%n} , distanceMatrix, nodes);
-                                if (delta < 0) {
-                                    LM.add(new Move(delta, new_move));
-                                }
+                    // Get the affected nodes and their neighbors
+                    Set<Integer> affectedNodes = getNeighborsFromMove(moveDetails, solution);
 
-                                // Backward direction move
-                                moveType = "intra_True";
-                                adjNode1 = solution.get((solution.indexOf(node1) - 1 + n) % n);
-                                adjNode2 = solution.get((j - 1 + n) % n);
-                                new_move = Arrays.asList(new int[]{node1, adjNode1}, new int[]{node2, adjNode2}, new String[]{moveType, moveType});
-                                delta = calculateEdgeExchangeDelta(solution, new int[]{(solution.indexOf(node1)-1+n)%n, solution.indexOf(node1)}, new int[]{(j-1+n)%n, j} , distanceMatrix, nodes);
-                                if (delta < 0) {
-                                    LM.add(new Move(delta, new_move));
-                                }
-                            }
-                        }
-
-                        for (int i = 0; i < N; i++) {
-                            if (!solution.contains(i)) {
-                                for(int j=0; j<4; j++){
-                                    String moveType = "inter";
-                                    int node1 = i;
-                                    int node2 = new_moves[j];
-                                    List<Object> new_move = Arrays.asList(new int[]{node1, node1}, new int[]{node2, node2}, new String[]{moveType, moveType});
-                                    double delta = calculateNodeInsertionDelta(solution, solution.indexOf(node2), node1, distanceMatrix, nodes);
-                                    if (delta < 0) {
-                                        LM.add(new Move(delta, new_move));
-                                    }
-                                }
-
-                            }
-                        }
-                    }else if(moveVariant.contains("inter")){
-                        int[] new_moves = new int[]{nodesArr1[0], nodesArr2[0]};
-                        for (int j = 0; j < n; j++) {
-                            // Forward direction move
-                            String moveType = "intra_False";
-                            int node1 = new_moves[nodesArr2[0]];
-                            int node2 = solution.get(j);
-                            int adjNode1 = solution.get((solution.indexOf(node1) + 1) % n);
-                            int adjNode2 = solution.get((j + 1) % n);
-                            List<Object> new_move = Arrays.asList(new int[]{node1, adjNode1}, new int[]{node2, adjNode2}, new String[]{moveType, moveType});
-                            double delta = calculateEdgeExchangeDelta(solution, new int[]{solution.indexOf(node1), (solution.indexOf(node1)+1)%n}, new int[]{j, (j+1)%n} , distanceMatrix, nodes);
-                            if (delta < 0) {
-                                LM.add(new Move(delta, new_move));
-                            }
-
-                            // Backward direction move
-                            moveType = "intra_True";
-                            adjNode1 = solution.get((solution.indexOf(node1) - 1 + n) % n);
-                            adjNode2 = solution.get((j - 1 + n) % n);
-                            new_move = Arrays.asList(new int[]{node1, adjNode1}, new int[]{node2, adjNode2}, new String[]{moveType, moveType});
-                            delta = calculateEdgeExchangeDelta(solution, new int[]{(solution.indexOf(node1)-1+n)%n, solution.indexOf(node1)}, new int[]{(j-1+n)%n, j} , distanceMatrix, nodes);
-                            if (delta < 0) {
-                                LM.add(new Move(delta, new_move));
-                            }
-                        }
-
-
-                        for (int i = 0; i < N; i++) {
-                            if (!solution.contains(i)) {
-                                String moveType = "inter";
-                                int node1 = i;
-                                int node2 = nodesArr2[0];
-                                List<Object> new_move = Arrays.asList(new int[]{node1, node1}, new int[]{node2, node2}, new String[]{moveType, moveType});
-                                double delta = calculateNodeInsertionDelta(solution, solution.indexOf(node2), node1, distanceMatrix, nodes);
-                                if (delta < 0) {
-                                    LM.add(new Move(delta, new_move));
-                                }
-                            }else{
-                                String moveType = "inter";
-                                int node1 = nodesArr1[0];
-                                int node2 = i;
-                                List<Object> new_move = Arrays.asList(new int[]{node1, node1}, new int[]{node2, node2}, new String[]{moveType, moveType});
-                                double delta = calculateNodeInsertionDelta(solution, solution.indexOf(node2), node1, distanceMatrix, nodes);
-                                if (delta < 0) {
-                                    LM.add(new Move(delta, new_move));
-                                }
-                            }
-                        }
+                    // Evaluate and add potential new moves for all affected nodes
+                    for (int node : affectedNodes) {
+                        evaluateAndAddMoves(node, solution, solutionSet, distanceMatrix, nodes);
                     }
-                    break;  // Restart with updated solution
+
+                    // Break to restart evaluation after applying a move
+                    break;
                 } else {
-                    // Handle cases where the move may no longer be applicable
-
-                    String[] moveTypes = (String[]) moveDetails.get(2);
-                    Integer moveStillPossible = checkMovePossibleAgain(solution, nodesArr1, nodesArr2, moveTypes);
-
-                    if (moveStillPossible == 0) {
-                        removedMoves.add(move);
-                    } else if (moveStillPossible == 2){
-                        improved = true;
-                        removedMoves.add(move);
-
-
-                        // solution = makeMove(solution, moveDetails, moveVariant, distanceMatrix, nodes);
-                        // LM.remove(move);
-                    }
+                    // Handle invalid moves
+                    handleInvalidMove(move, removedMoves, solution, nodes);
                 }
             }
-            // if move m has been found then    TODO
-            //x := m(x) (accept m(x))
+
+            // Remove processed moves from LM
             LM.removeAll(removedMoves);
             removedMoves.clear();
         }
@@ -210,8 +113,94 @@ public class SteepestLocalSearchWithMoveEvaluations {
         return solution;
     }
 
+    private Set<Integer> getNeighborsFromMove(List<Object> moveDetails, List<Integer> solution) {
+        int[] nodesArr1 = (int[]) moveDetails.get(0);
+        int[] nodesArr2 = (int[]) moveDetails.get(1);
+
+        Set<Integer> neighbors = new HashSet<>();
+        for (int node : nodesArr1) {
+            neighbors.add(node);
+            neighbors.add(solution.get((solution.indexOf(node) + 1) % solution.size())); // Forward neighbor
+            neighbors.add(solution.get((solution.indexOf(node) - 1 + solution.size()) % solution.size())); // Backward neighbor
+        }
+        for (int node : nodesArr2) {
+            neighbors.add(node);
+            neighbors.add(solution.get((solution.indexOf(node) + 1) % solution.size())); // Forward neighbor
+            neighbors.add(solution.get((solution.indexOf(node) - 1 + solution.size()) % solution.size())); // Backward neighbor
+        }
+        return neighbors;
+    }
+
+    private void evaluateAndAddMoves(int node, List<Integer> solution, Set<Integer> solutionSet,
+                                     double[][] distanceMatrix, double[][] nodes) {
+        int n = solution.size();
+
+        // Evaluate intra-solution moves
+        for (int j = 0; j < n; j++) {
+            int adjNode = solution.get((j + 1) % n);
+
+            // Forward direction move
+            String moveType = "intra_False";
+            double delta = calculateEdgeExchangeDelta(solution,
+                    new int[]{solution.indexOf(node), (solution.indexOf(node) + 1) % n},
+                    new int[]{j, (j + 1) % n}, distanceMatrix, nodes);
+            if (delta < 0) {
+                List<Object> newMove = Arrays.asList(
+                        new int[]{node, solution.get((solution.indexOf(node) + 1) % n)},
+                        new int[]{adjNode, solution.get((j + 1) % n)},
+                        new String[]{moveType, moveType}
+                );
+                LM.add(new Move(delta, newMove));
+            }
+
+            // Backward direction move
+            moveType = "intra_True";
+            delta = calculateEdgeExchangeDelta(solution,
+                    new int[]{(solution.indexOf(node) - 1 + n) % n, solution.indexOf(node)},
+                    new int[]{(j - 1 + n) % n, j}, distanceMatrix, nodes);
+            if (delta < 0) {
+                List<Object> newMove = Arrays.asList(
+                        new int[]{solution.get((solution.indexOf(node) - 1 + n) % n), node},
+                        new int[]{solution.get((j - 1 + n) % n), adjNode},
+                        new String[]{moveType, moveType}
+                );
+                LM.add(new Move(delta, newMove));
+            }
+        }
+
+        // Evaluate inter-solution moves (node insertion)
+        for (int i = 0; i < nodes.length; i++) {
+            if (!solution.contains(i)) {
+                String moveType = "inter";
+                double delta = calculateNodeInsertionDelta(solution, solution.indexOf(node), i, distanceMatrix, nodes);
+                if (delta < 0) {
+                    List<Object> newMove = Arrays.asList(
+                            new int[]{i, i}, new int[]{node, node}, new String[]{moveType, moveType}
+                    );
+                    LM.add(new Move(delta, newMove));
+                }
+            }
+        }
+    }
+
+    private void handleInvalidMove(Move move, List<Move> removedMoves, List<Integer> solution, double[][] nodes) {
+        List<Object> moveDetails = move.getMoveDetails();
+        int[] nodesArr1 = (int[]) moveDetails.get(0);
+        int[] nodesArr2 = (int[]) moveDetails.get(1);
+        String[] moveTypes = (String[]) moveDetails.get(2);
+
+        Integer moveStillPossible = checkMovePossibleAgain(solution, nodesArr1, nodesArr2, moveTypes);
+        if (moveStillPossible == 0) {
+            removedMoves.add(move); // Permanently remove invalid move
+        } else if (moveStillPossible == 2) {
+            removedMoves.add(move); // Optionally re-check
+        }
+    }
+
+
+
     // Checks whether a move is valid in the current solution
-    private boolean checkMoveValidity(List<Integer> solution, List<Object> moveDetails, Set<Integer> solutionSet, double delta, double[][] distanceMatrix, double[][] nodes) {
+    private boolean checkMoveValidity(List<Integer> solution, List<Object> moveDetails, Set<Integer> solutionSet, double delta, double[][] distanceMatrix, double[][] nodes, Move move) {
         int[] node1 = (int[]) moveDetails.get(0);
         int[] node2 = (int[]) moveDetails.get(1);
         String[] moveTypes = (String[]) moveDetails.get(2);
@@ -220,17 +209,13 @@ public class SteepestLocalSearchWithMoveEvaluations {
             if(moveTypes[0].contains("False")){
                 double new_delta = calculateEdgeExchangeDelta(solution, node1, node2 , distanceMatrix, nodes);
                 if (new_delta <= delta) {
-                    //System.out.println("Edge exchange delta mismatch for intra move (False). "+new_delta+" "+delta);
-                    Move correctedMove = new Move(new_delta, moveDetails);
-                    LM.add(correctedMove);
+
                     return false;
                 }
             }else if(moveTypes[0].contains("True")){
                 double new_delta = calculateEdgeExchangeDelta(solution, new int[]{node1[1], node1[0]}, new int[]{node2[1], node2[0]} , distanceMatrix, nodes);
                 if (new_delta <= delta) {
-                    //System.out.println("Edge exchange delta mismatch for intra move (True).");
-                    Move correctedMove = new Move(new_delta, moveDetails);
-                    LM.add(correctedMove);
+
                     return false;
                 }
             }
@@ -240,9 +225,7 @@ public class SteepestLocalSearchWithMoveEvaluations {
             if(!solution.contains(node2[0])){return false;}
             double new_delta = calculateNodeInsertionDelta(solution, solution.indexOf(node2[0]), node1[0], distanceMatrix, nodes);
             if (new_delta <= delta) {
-                //System.out.println("Node insertion delta mismatch for inter move.");
-                Move correctedMove = new Move(new_delta, moveDetails);
-                LM.add(correctedMove);
+
                 return false;
             }
             return solution.contains(node2[0]) && !solution.contains(node1[0]);
@@ -339,7 +322,38 @@ public class SteepestLocalSearchWithMoveEvaluations {
     }
 
 
+    public static double calculateTwoEdgesExchangeDelta(List<Integer> currentSolution, int i, int j, double[][] distanceMatrix) {
+        int nodeA1 = currentSolution.get(i);
+        int nodeA2 = currentSolution.get((i + 1) % currentSolution.size());
+        int nodeB1 = currentSolution.get(j);
+        int nodeB2 = currentSolution.get((j + 1) % currentSolution.size());
 
+        double originalCost = distanceMatrix[nodeA1][nodeA2] + distanceMatrix[nodeB1][nodeB2];
+        double newCost = distanceMatrix[nodeA1][nodeB1] + distanceMatrix[nodeA2][nodeB2];
+
+        return newCost - originalCost;
+    }
+
+    public static double calculateSingleNodeChangeDelta(List<Integer> currentSolution, int index, int newNode, double[][] distanceMatrix, double[][] nodes) {
+        int currentNode = currentSolution.get(index);
+        double currentNodeCost = nodes[currentNode][2];
+        double newNodeCost = nodes[newNode][2];
+        double costChange = newNodeCost - currentNodeCost;
+
+        if (index == 0) {
+            double originalCost = distanceMatrix[currentNode][currentSolution.get(index + 1)];
+            double newCost = distanceMatrix[newNode][currentSolution.get(index + 1)];
+            return costChange + (newCost - originalCost);
+        } else if (index == currentSolution.size() - 1) {
+            double originalCost = distanceMatrix[currentSolution.get(index - 1)][currentNode];
+            double newCost = distanceMatrix[currentSolution.get(index - 1)][newNode];
+            return costChange + (newCost - originalCost);
+        } else {
+            double originalCost = distanceMatrix[currentSolution.get(index - 1)][currentNode] + distanceMatrix[currentNode][currentSolution.get(index + 1)];
+            double newCost = distanceMatrix[currentSolution.get(index - 1)][newNode] + distanceMatrix[newNode][currentSolution.get(index + 1)];
+            return costChange + (newCost - originalCost);
+        }
+    }
 
 
     // Data structure for storing moves and their deltas

@@ -2,7 +2,7 @@ package lab.tsp;
 
 import java.util.*;
 
-public class SteepestLocalSearchWithCandidates {
+public class SteepestLocalSearchWithCandidates2 {
 
     private static final int CANDIDATE_COUNT = 10;
 
