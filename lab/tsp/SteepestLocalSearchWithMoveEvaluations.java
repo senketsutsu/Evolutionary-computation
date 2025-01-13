@@ -71,6 +71,7 @@ public class SteepestLocalSearchWithMoveEvaluations {
         // Add a list of new moves that we need to evaluate (moves that were not possible before but after changing the current solution now they can occure)   TODO
 
         // while (!LM.isEmpty()) {
+
         while (improved) {
             improved = false;
 
@@ -84,6 +85,7 @@ public class SteepestLocalSearchWithMoveEvaluations {
                 boolean applicable = checkMoveValidity(solution, moveDetails, solutionSet, move.delta, distanceMatrix, nodes, move);
 
                 if (applicable) {
+                    System.out.println("f1");
                     // Apply the move and mark improvement
                     improved = true;
                     solution = makeMove(solution, moveDetails, moveVariant, distanceMatrix, nodes);
@@ -94,14 +96,12 @@ public class SteepestLocalSearchWithMoveEvaluations {
 
                     // Evaluate and add potential new moves for all affected nodes
                     for (int node : affectedNodes) {
+                        System.out.println("f2");
                         evaluateAndAddMoves(node, solution, solutionSet, distanceMatrix, nodes);
                     }
 
                     // Break to restart evaluation after applying a move
                     break;
-                } else {
-                    // Handle invalid moves
-                    handleInvalidMove(move, removedMoves, solution, nodes);
                 }
             }
 
@@ -210,13 +210,13 @@ public class SteepestLocalSearchWithMoveEvaluations {
                 double new_delta = calculateEdgeExchangeDelta(solution, node1, node2 , distanceMatrix, nodes);
                 if (new_delta <= delta) {
 
-                    return false;
+                    return true;
                 }
             }else if(moveTypes[0].contains("True")){
                 double new_delta = calculateEdgeExchangeDelta(solution, new int[]{node1[1], node1[0]}, new int[]{node2[1], node2[0]} , distanceMatrix, nodes);
                 if (new_delta <= delta) {
 
-                    return false;
+                    return true;
                 }
             }
 
@@ -226,7 +226,7 @@ public class SteepestLocalSearchWithMoveEvaluations {
             double new_delta = calculateNodeInsertionDelta(solution, solution.indexOf(node2[0]), node1[0], distanceMatrix, nodes);
             if (new_delta <= delta) {
 
-                return false;
+                return true;
             }
             return solution.contains(node2[0]) && !solution.contains(node1[0]);
         }

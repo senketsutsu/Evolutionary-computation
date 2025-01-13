@@ -1,9 +1,8 @@
 package lab.tsp;
-import lab.tsp.RandomSolution;
 
 import java.util.*;
 
-public class GPtsp {
+public class GPtsp2 {
     /**
      * Finds path using GP approach  inspired by: https://www.geeksforgeeks.org/traveling-salesman-problem-using-genetic-algorithm/?ref=ml_lbp
      *
@@ -13,7 +12,7 @@ public class GPtsp {
      */
 
     static int POP_SIZE = 100;
-    static int gen_thres = 100000; // 25000
+    static int gen_thres = 1000; // 25000
     static double mut_prob = 0.8;
     static double cros_prob = 0.1;
     NearestNeighborAnyPosition NearestNeighborAnyPosition_gen = new NearestNeighborAnyPosition();
@@ -42,7 +41,8 @@ public class GPtsp {
             previousBestFitness = bestFitness;
             List<Individual> newGeneration = new ArrayList<>();
 
-            if (noImprovementCount > 50) { //25
+
+            if (noImprovementCount > 10) { //25
                 // System.out.println("Population reset to avoid stagnation.");
                 int s = (15 * POP_SIZE) / 100;
                 for (int i = 0; i < s; i++)
@@ -55,20 +55,13 @@ public class GPtsp {
                 continue;
             }
 
-            if (population.get(0).fitness <= 0) {
-                break;
-            }
-
 
             int elite = 10;
             int s = (elite * POP_SIZE) / 100;
             for (int i = 0; i < s; i++)
                 newGeneration.add(population.get(i));
 
-            for (int i = 0; i < s; i++)
-                newGeneration.add(createGnome(nodeData, distanceMatrix));
-
-            s = ((20) * POP_SIZE) / 100;
+            s = ((30) * POP_SIZE) / 100;
             for (int i = 0; i < s; i++) {
                 Individual parent1 = population.get(i);
 
